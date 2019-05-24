@@ -8,6 +8,8 @@ public class Main {
     public static void main(String[] args) {
         String input = lerArquivo("code.xpp");
 
+        Parser parser = new Parser(input);
+
     }
 
     private static String lerArquivo(String fileName) {
@@ -28,6 +30,6 @@ public class Main {
             e.printStackTrace();
         }
 
-        return input;
+         return input;
     }
 }
