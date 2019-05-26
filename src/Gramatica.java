@@ -3,5 +3,7 @@ public enum Gramatica {
    UNARY_EXPRESSION,
    TERM,
    NUM_EXPRESSION,
-   EXPRESSION
+   EXPRESSION,
+   LVALUE,
+   LVALUECOMP
 }

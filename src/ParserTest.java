@@ -33,7 +33,7 @@ class ParserTest {
 
       parser.program();
 
-      Gramatica naoTerminalRetornado = parser.getPilha().elementAt(9);
+      Gramatica naoTerminalRetornado = parser.getPilha().elementAt(8);
       assertEquals(naoTerminalEsperado, naoTerminalRetornado);
    }
 
@@ -188,6 +188,61 @@ class ParserTest {
       parser.program();
 
       Gramatica naoTerminalRetornado = parser.getPilha().lastElement();
+      assertEquals(naoTerminalEsperado, naoTerminalRetornado);
+   }
+
+   @Test
+   void deve_reconhecer_LVALUE_simples() {
+      Parser parser = new Parser("+_abc");
+      Gramatica naoTerminalEsperado = Gramatica.LVALUE;
+
+      parser.program();
+
+      Gramatica naoTerminalRetornado = parser.getPilha().firstElement();
+      assertEquals(naoTerminalEsperado, naoTerminalRetornado);
+   }
+
+   @Test
+   void deve_reconhecer_LValue_EXPRESSION() {
+      Parser parser = new Parser("+id[+6]");
+      Gramatica naoTerminalEsperado = Gramatica.LVALUE;
+
+      parser.program();
+
+      Gramatica naoTerminalRetornado = parser.getPilha().elementAt(5);
+      assertEquals(naoTerminalEsperado, naoTerminalRetornado);
+   }
+
+   @Test
+   void deve_reconhecer_LVALUECOMP_simples() {
+      Parser parser = new Parser("+id.id");
+      Gramatica naoTerminalEsperado = Gramatica.LVALUECOMP;
+
+      parser.program();
+
+      Gramatica naoTerminalRetornado = parser.getPilha().firstElement();
+      assertEquals(naoTerminalEsperado, naoTerminalRetornado);
+   }
+
+   @Test
+   void deve_reconhecer_LVALUECOMP_EXPRESSION() {
+      Parser parser = new Parser("+id.id[+7]");
+      Gramatica naoTerminalEsperado = Gramatica.LVALUECOMP;
+
+      parser.program();
+
+      Gramatica naoTerminalRetornado = parser.getPilha().elementAt(5);
+      assertEquals(naoTerminalEsperado, naoTerminalRetornado);
+   }
+
+   @Test
+   void deve_reconhecer_LVALUE_EXPRESSION_LVALUECOMP_EXPRESSION_LVALUECOMP() {
+      Parser parser = new Parser("+id[+0].abc[-\"s\"].i");
+      Gramatica naoTerminalEsperado = Gramatica.LVALUE;
+
+      parser.program();
+
+      Gramatica naoTerminalRetornado = parser.getPilha().elementAt(12);
       assertEquals(naoTerminalEsperado, naoTerminalRetornado);
    }
 }

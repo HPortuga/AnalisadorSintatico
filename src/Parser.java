@@ -29,7 +29,6 @@ public class Parser {
       }
    }
 
-   // Falta 'LValue'
    private void factor() {
       if (this.lToken.getName() == Names.INTEGER_LITERAL
             || this.lToken.getName() == Names.STRING) {
@@ -41,6 +40,49 @@ public class Parser {
          expression();
          match(Names.RPAREN);
          pilha.push(Gramatica.FACTOR);
+      }
+      else if (this.lToken.getName() == Names.ID) {
+         lValue();
+         pilha.push(Gramatica.FACTOR);
+      }
+   }
+
+   private void lValue() {
+      if (this.lToken.getName() == Names.ID) {
+         advance();
+         lValue_Line();
+         lValueComp();
+         pilha.push(Gramatica.LVALUE);
+      }
+   }
+
+   private void lValue_Line() {
+      if (this.lToken.getName() == Names.LSBR) {
+         advance();
+         expression();
+         match(Names.RSBR);
+         lValueComp();
+      }
+   }
+
+   private void lValueComp() {
+      if (this.lToken.getName() == Names.DOT) {
+         advance();
+         if (this.lToken.getName() == Names.ID) {
+            advance();
+            lValueComp();
+            lValueComp_line();
+            pilha.push(Gramatica.LVALUECOMP);
+         }
+      }
+   }
+
+   private void lValueComp_line() {
+      if (this.lToken.getName() == Names.LSBR) {
+         advance();
+         expression();
+         match(Names.RSBR);
+         lValueComp();
       }
    }
 
@@ -54,7 +96,6 @@ public class Parser {
       if (this.lToken.getName() == Names.RELOP) {
          advance();
          numExpression();
-         pilha.push(Gramatica.EXPRESSION);
       }
    }
 
@@ -69,7 +110,6 @@ public class Parser {
          advance();
          term();
          numExpression_line();
-         pilha.push(Gramatica.NUM_EXPRESSION);
       }
    }
 
@@ -84,7 +124,6 @@ public class Parser {
          advance();
          unaryExpression();
          term_line();
-         pilha.push(Gramatica.TERM);
       }
    }
 
