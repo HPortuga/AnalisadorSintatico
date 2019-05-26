@@ -9,7 +9,7 @@ public class Main {
         String input = lerArquivo("code.xpp");
 
         Parser parser = new Parser(input);
-
+        parser.program();
     }
 
     private static String lerArquivo(String fileName) {

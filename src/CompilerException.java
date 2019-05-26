@@ -3,8 +3,6 @@
  * and open the template in the editor.
  */
 
-package compiler;
-
 /**
  *
  * @author Bianca de Almeida Dantas <bianca at facom.ufms.br>
