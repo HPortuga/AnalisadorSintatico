@@ -258,7 +258,7 @@ class ScannerTest {
    }
 
    @Test
-   void deve_reconhecer_STRING() {
+   void deve_reconhecer_STRING_LITERAL() {
       Scanner scanner = new Scanner("\"HAHAHAH 8 9 0 as % 4\" as 5/");
       List<String> listaEsperada = Stream.of(
             new Token(Names.STRING_LITERAL, "\"HAHAHAH 8 9 0 as % 4\""),
@@ -297,6 +297,231 @@ class ScannerTest {
             new Token(Names.ID, "asd"),
             new Token(Names.ID, "isto"),
             new Token(Names.ID, "não"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_CLASS() {
+      Scanner scanner = new Scanner("class abacate classe Class");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.CLASS, "class"),
+            new Token(Names.ID, "abacate"),
+            new Token(Names.ID, "classe"),
+            new Token(Names.ID, "Class"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_EXTENDS() {
+      Scanner scanner = new Scanner("Extends extendsu extends");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.ID, "Extends"),
+            new Token(Names.ID, "extendsu"),
+            new Token(Names.EXTENDS, "extends"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_INT() {
+      Scanner scanner = new Scanner("Int int inteiro");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.ID, "Int"),
+            new Token(Names.INT, "int"),
+            new Token(Names.ID, "inteiro"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_STRING() {
+      Scanner scanner = new Scanner("String string stringue");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.ID, "String"),
+            new Token(Names.STRING, "string"),
+            new Token(Names.ID, "stringue"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_BREAK() {
+      Scanner scanner = new Scanner("Break break breako");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.ID, "Break"),
+            new Token(Names.BREAK, "break"),
+            new Token(Names.ID, "breako"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_PRINT() {
+      Scanner scanner = new Scanner("Print print printo");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.ID, "Print"),
+            new Token(Names.PRINT, "print"),
+            new Token(Names.ID, "printo"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_READ() {
+      Scanner scanner = new Scanner("read Read reado");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.READ, "read"),
+            new Token(Names.ID, "Read"),
+            new Token(Names.ID, "reado"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_RETURN() {
+      Scanner scanner = new Scanner("return Return returno");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.RETURN, "return"),
+            new Token(Names.ID, "Return"),
+            new Token(Names.ID, "returno"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_SUPER() {
+      Scanner scanner = new Scanner("super Super supero");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.SUPER, "super"),
+            new Token(Names.ID, "Super"),
+            new Token(Names.ID, "supero"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_IF() {
+      Scanner scanner = new Scanner("if If ifo");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.IF, "if"),
+            new Token(Names.ID, "If"),
+            new Token(Names.ID, "ifo"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_ELSE() {
+      Scanner scanner = new Scanner("else Else elseo");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.ELSE, "else"),
+            new Token(Names.ID, "Else"),
+            new Token(Names.ID, "elseo"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_FOR() {
+      Scanner scanner = new Scanner("for For foro");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.FOR, "for"),
+            new Token(Names.ID, "For"),
+            new Token(Names.ID, "foro"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_NEW() {
+      Scanner scanner = new Scanner("new New newo");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.NEW, "new"),
+            new Token(Names.ID, "New"),
+            new Token(Names.ID, "newo"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_CONSTRUCTOR() {
+      Scanner scanner = new Scanner("constructor Constructor constructoro");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.CONSTRUCTOR, "constructor"),
+            new Token(Names.ID, "Constructor"),
+            new Token(Names.ID, "constructoro"),
             eof)
             .map(Token::toString)
             .collect(Collectors.toList());

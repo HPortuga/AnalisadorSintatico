@@ -1,3 +1,5 @@
+import javax.naming.Name;
+
 public class Scanner {
    private String input;
    private int pos;
@@ -83,7 +85,37 @@ public class Scanner {
                }
 
                state = 0;
-               return new Token(Names.ID, lexema);
+
+               if (lexema.equals(Names.CLASS.name().toLowerCase()))
+                  return new Token(Names.CLASS, lexema);
+               else if (lexema.equals(Names.EXTENDS.name().toLowerCase()))
+                  return new Token(Names.EXTENDS, lexema);
+               else if (lexema.equals(Names.INT.name().toLowerCase()))
+                  return new Token(Names.INT, lexema);
+               else if (lexema.equals(Names.STRING.name().toLowerCase()))
+                  return new Token(Names.STRING, lexema);
+               else if (lexema.equals(Names.BREAK.name().toLowerCase()))
+                  return new Token(Names.BREAK, lexema);
+               else if (lexema.equals(Names.PRINT.name().toLowerCase()))
+                  return new Token(Names.PRINT, lexema);
+               else if (lexema.equals(Names.READ.name().toLowerCase()))
+                  return new Token(Names.READ, lexema);
+               else if (lexema.equals(Names.RETURN.name().toLowerCase()))
+                  return new Token(Names.RETURN, lexema);
+               else if (lexema.equals(Names.SUPER.name().toLowerCase()))
+                  return new Token(Names.SUPER, lexema);
+               else if (lexema.equals(Names.IF.name().toLowerCase()))
+                  return new Token(Names.IF, lexema);
+               else if (lexema.equals(Names.ELSE.name().toLowerCase()))
+                  return new Token(Names.ELSE, lexema);
+               else if (lexema.equals(Names.FOR.name().toLowerCase()))
+                  return new Token(Names.FOR, lexema);
+               else if (lexema.equals(Names.NEW.name().toLowerCase()))
+                  return new Token(Names.NEW, lexema);
+               else if (lexema.equals(Names.CONSTRUCTOR.name().toLowerCase()))
+                  return new Token(Names.CONSTRUCTOR, lexema);
+               else
+                  return new Token(Names.ID, lexema);
 
             case 2:  // Espaço em branco
                while (getPos() < getInput().length()) {
@@ -196,7 +228,7 @@ public class Scanner {
                   return new Token(Names.COMMA, lexema);
                else if (chr == '.')
                   return new Token(Names.DOT, lexema);
-               else
+               else if (chr == ';')
                   return new Token(Names.SEMICOLON, lexema);
 
             case 9:  // String
@@ -250,34 +282,6 @@ public class Scanner {
                state = 0;
                break;
 
-            case 12: // Palavras reservadas
-               lexema = "";
-               lexema += String.valueOf(chr);
-
-               if (getPos() < getInput().length()) {
-                  if (chr == 'c')
-                     state = 13;
-               }
-
-            case 13: // class
-               lexema = "";
-               lexema += String.valueOf(chr);
-               int i = 0;
-
-               if (getPos() < getInput().length()) {
-                  while (i < Names.CLASS.name().length()) {
-                     chr = input.charAt(getPos());
-                     lexema += String.valueOf(chr);
-                     i++;
-                  }
-
-                  state = 0;
-
-                  if (lexema.equals(Names.CLASS.name()))
-                     return new Token(Names.CLASS, lexema);
-//                  else if (lexema.equals(Names.))
-
-               }
             default:
                lexicalError();
          }
