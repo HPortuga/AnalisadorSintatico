@@ -29,6 +29,69 @@ public class Parser {
       }
    }
 
+   private void classList() {
+      classDecl();
+      classList_line();
+   }
+
+   private void classList_line() {
+      classDecl();
+      classList();
+   }
+
+   private void classDecl() {
+
+   }
+
+   private void expression() {
+      numExpression();
+      expression_line();
+      pilha.push(Gramatica.EXPRESSION);
+   }
+
+   private void expression_line() {
+      if (this.lToken.getName() == Names.RELOP) {
+         advance();
+         numExpression();
+      }
+   }
+
+   private void numExpression() {
+      term();
+      numExpression_line();
+      pilha.push(Gramatica.NUM_EXPRESSION);
+   }
+
+   private void numExpression_line() {
+      if (this.lToken.getName() == Names.OPNUM) {
+         advance();
+         term();
+         numExpression_line();
+      }
+   }
+
+   private void term() {
+      unaryExpression();
+      term_line();
+      pilha.push(Gramatica.TERM);
+   }
+
+   private void term_line() {
+      if (this.lToken.getName() == Names.OPUN) {
+         advance();
+         unaryExpression();
+         term_line();
+      }
+   }
+
+   private void unaryExpression() {
+      if (this.lToken.getName() == Names.OPNUM) {
+         advance();
+         factor();
+         pilha.push(Gramatica.UNARY_EXPRESSION);
+      }
+   }
+
    private void factor() {
       if (this.lToken.getName() == Names.INTEGER_LITERAL
             || this.lToken.getName() == Names.STRING) {
@@ -86,52 +149,21 @@ public class Parser {
       }
    }
 
-   private void expression() {
-      numExpression();
-      expression_line();
-      pilha.push(Gramatica.EXPRESSION);
+   private void argListOpt() {
+      argList();
+      pilha.push(Gramatica.ARGLISTOPT);
    }
 
-   private void expression_line() {
-      if (this.lToken.getName() == Names.RELOP) {
+   private void argList() {
+      expression();
+      argList_line();
+      pilha.push(Gramatica.ARGLIST);
+   }
+
+   private void argList_line() {
+      if (this.lToken.getName() == Names.COMMA) {
          advance();
-         numExpression();
-      }
-   }
-
-   private void numExpression() {
-      term();
-      numExpression_line();
-      pilha.push(Gramatica.NUM_EXPRESSION);
-   }
-
-   private void numExpression_line() {
-      if (this.lToken.getName() == Names.OPNUM) {
-         advance();
-         term();
-         numExpression_line();
-      }
-   }
-
-   private void term() {
-      unaryExpression();
-      term_line();
-      pilha.push(Gramatica.TERM);
-   }
-
-   private void term_line() {
-      if (this.lToken.getName() == Names.OPUN) {
-         advance();
-         unaryExpression();
-         term_line();
-      }
-   }
-
-   private void unaryExpression() {
-      if (this.lToken.getName() == Names.OPNUM) {
-         advance();
-         factor();
-         pilha.push(Gramatica.UNARY_EXPRESSION);
+         expression();
       }
    }
 

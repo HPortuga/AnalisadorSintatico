@@ -5,5 +5,7 @@ public enum Gramatica {
    NUM_EXPRESSION,
    EXPRESSION,
    LVALUE,
-   LVALUECOMP
+   LVALUECOMP,
+   ARGLIST,
+   ARGLISTOPT
 }

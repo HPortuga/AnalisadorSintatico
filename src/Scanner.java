@@ -61,6 +61,8 @@ public class Scanner {
                   state = 8;
                else if (chr == '"')
                   state = 9;
+               else if (isFirstPalavrasReservadas(chr))
+                  state = 12;
                else
                   lexicalError();
 
@@ -214,7 +216,7 @@ public class Scanner {
 
                state = 0;
                if (finalizouString)
-                  return new Token(Names.STRING, lexema);
+                  return new Token(Names.STRING_LITERAL, lexema);
                else
                   lexicalError();
 
@@ -248,6 +250,34 @@ public class Scanner {
                state = 0;
                break;
 
+            case 12: // Palavras reservadas
+               lexema = "";
+               lexema += String.valueOf(chr);
+
+               if (getPos() < getInput().length()) {
+                  if (chr == 'c')
+                     state = 13;
+               }
+
+            case 13: // class
+               lexema = "";
+               lexema += String.valueOf(chr);
+               int i = 0;
+
+               if (getPos() < getInput().length()) {
+                  while (i < Names.CLASS.name().length()) {
+                     chr = input.charAt(getPos());
+                     lexema += String.valueOf(chr);
+                     i++;
+                  }
+
+                  state = 0;
+
+                  if (lexema.equals(Names.CLASS.name()))
+                     return new Token(Names.CLASS, lexema);
+//                  else if (lexema.equals(Names.))
+
+               }
             default:
                lexicalError();
          }
@@ -268,5 +298,10 @@ public class Scanner {
 
    private boolean isUnderscore(char chr) {
       return (chr == '_');
+   }
+
+   private boolean isFirstPalavrasReservadas(char chr) {
+      return chr == 'c' || chr == 'e' || chr == 'i' || chr == 's' || chr == 'b' || chr == 'p'
+            || chr == 'r' || chr == 'f' || chr == 'n';
    }
 }

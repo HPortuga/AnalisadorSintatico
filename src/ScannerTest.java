@@ -261,7 +261,7 @@ class ScannerTest {
    void deve_reconhecer_STRING() {
       Scanner scanner = new Scanner("\"HAHAHAH 8 9 0 as % 4\" as 5/");
       List<String> listaEsperada = Stream.of(
-            new Token(Names.STRING, "\"HAHAHAH 8 9 0 as % 4\""),
+            new Token(Names.STRING_LITERAL, "\"HAHAHAH 8 9 0 as % 4\""),
             new Token(Names.ID, "as"),
             new Token(Names.INTEGER_LITERAL, "5"),
             new Token(Names.OPUN, "/"),

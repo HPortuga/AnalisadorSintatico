@@ -245,6 +245,10 @@ class ParserTest {
       Gramatica naoTerminalRetornado = parser.getPilha().elementAt(12);
       assertEquals(naoTerminalEsperado, naoTerminalRetornado);
    }
+
+   // Ate aqui funciona com program -> expression. Se mudar vai quebrar
+
+
 }
 
 
