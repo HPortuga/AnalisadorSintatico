@@ -24,7 +24,7 @@ public class Parser {
 
    public void program() {
       while (lToken.getName() != Names.EOF) {
-         expression();
+         classList();
          advance();
       }
    }
@@ -40,7 +40,382 @@ public class Parser {
    }
 
    private void classDecl() {
+      if (this.lToken.getName() == Names.CLASS) {
+         advance();
+         if (this.lToken.getName() == Names.ID) {
+            advance();
+            classBody();
+         }
+      }
+      classDecl_line();
+   }
 
+   private void classDecl_line() {
+      if (this.lToken.getName() == Names.CLASS) {
+         advance();
+         if (this.lToken.getName() == Names.ID) {
+            advance();
+            if (this.lToken.getName() == Names.EXTENDS) {
+               advance();
+               if (this.lToken.getName() == Names.ID) {
+                  advance();
+                  classBody();
+               }
+            }
+         }
+      }
+   }
+
+   private void classBody() {
+      if (this.lToken.getName() == Names.LCBR) {
+         advance();
+         varDeclListOpt();
+         constructDeclListOpt();
+         methodDeclListOpt();
+         match(Names.RCBR);
+      }
+   }
+
+   private void varDeclListOpt() {
+      varDeclList();
+   }
+
+   private void varDeclList() {
+      varDecl();
+      varDeclList_line();
+   }
+
+   private void varDeclList_line() {
+      varDeclList();
+      varDecl();
+   }
+
+   private void varDecl() {
+      type();
+      varDecl_line();
+   }
+
+   private void varDecl_line() {
+      if (this.lToken.getName() == Names.ID) {
+         advance();
+         varDeclOpt();
+         match(Names.SEMICOLON);
+      }
+      else if (this.lToken.getName() == Names.LSBR) {
+         advance();
+         match(Names.RSBR);
+         if (this.lToken.getName() == Names.ID) {
+            advance();
+            varDeclOpt();
+            match(Names.SEMICOLON);
+         }
+      }
+   }
+
+   private void varDeclOpt() {
+      if (this.lToken.getName() == Names.COMMA) {
+         advance();
+         if (this.lToken.getName() == Names.ID) {
+            advance();
+            varDeclOpt();
+         }
+      }
+   }
+
+   private void type() {
+      if (this.lToken.getName() == Names.INT
+      || this.lToken.getName() == Names.STRING
+      || this.lToken.getName() == Names.ID)
+         advance();
+   }
+
+   private void constructDeclListOpt() {
+      constructDeclList();
+   }
+
+   private void constructDeclList() {
+      constructDecl();
+      constructDeclList_line();
+   }
+
+   private void constructDeclList_line() {
+      constructDeclList();
+      constructDecl();
+   }
+
+   private void constructDecl() {
+      if (this.lToken.getName() == Names.CONSTRUCTOR) {
+         advance();
+         methodBody();
+      }
+   }
+
+   private void methodDeclListOpt() {
+      methodDeclList();
+   }
+
+   private void methodDeclList() {
+      methodDecl();
+      methodDeclList_line();
+   }
+
+   private void methodDeclList_line() {
+      methodDeclList();
+      methodDecl();
+   }
+
+   private void methodDecl() {
+      type();
+      methodDecl_line();
+   }
+
+   private void methodDecl_line() {
+      if (this.lToken.getName() == Names.ID) {
+         advance();
+         methodBody();
+      }
+      else if (this.lToken.getName() == Names.LSBR) {
+         advance();
+         match(Names.RSBR);
+         methodBody();
+      }
+   }
+
+   private void methodBody() {
+      if (this.lToken.getName() == Names.LPAREN) {
+         advance();
+         paramListOpt();
+         match(Names.RPAREN);
+         if (this.lToken.getName() == Names.LCBR) {
+            advance();
+            statementsOpt();
+            match(Names.RCBR);
+         }
+      }
+   }
+
+   private void paramListOpt() {
+      paramList();
+   }
+
+   private void paramList() {
+      param();
+      paramList_line();
+   }
+
+   private void paramList_line() {
+      paramList();
+      if (this.lToken.getName() == Names.COMMA)
+         param();
+   }
+
+   private void param() {
+      type();
+      param_line();
+   }
+
+   private void param_line() {
+      if (this.lToken.getName() == Names.ID)
+         advance();
+      else if (this.lToken.getName() == Names.LSBR) {
+         advance();
+         match(Names.RSBR);
+         if (this.lToken.getName() == Names.ID)
+            advance();
+      }
+   }
+
+   private void statementsOpt() {
+      statements();
+   }
+
+   private void statements() {
+      statement();
+      statements_line();
+   }
+
+   private void statements_line() {
+      statements();
+      statement();
+   }
+
+   public void statement() {
+      varDeclList();
+
+      atribStat();
+      if (this.lToken.getName() == Names.SEMICOLON)
+         advance();
+
+      printStat();
+      if (this.lToken.getName() == Names.SEMICOLON)
+         advance();
+
+      readStat();
+      if (this.lToken.getName() == Names.SEMICOLON)
+         advance();
+
+      returnStat();
+      if (this.lToken.getName() == Names.SEMICOLON)
+         advance();
+
+      superStat();
+      if (this.lToken.getName() == Names.SEMICOLON)
+         advance();
+
+      ifStat();
+      forStat();
+
+      if (this.lToken.getName() == Names.BREAK) {
+         advance();
+         match(Names.SEMICOLON);
+      }
+
+      if (this.lToken.getName() == Names.SEMICOLON)
+         advance();
+   }
+
+   private void atribStat() {
+      lValue();
+      if (this.lToken.getName() == Names.ATTR) {
+         advance();
+         atribStat_line();
+      }
+   }
+
+   private void atribStat_line() {
+      expression();
+      allocExpresion();
+   }
+
+   private void printStat() {
+      if (this.lToken.getName() == Names.PRINT) {
+         advance();
+         expression();
+      }
+   }
+
+   private void readStat() {
+      if (this.lToken.getName() == Names.READ) {
+         advance();
+         expression();
+      }
+   }
+
+   private void returnStat() {
+      if (this.lToken.getName() == Names.RETURN) {
+         advance();
+         expression();
+      }
+   }
+
+   private void superStat() {
+      if (this.lToken.getName() == Names.SUPER) {
+         advance();
+         if (this.lToken.getName() == Names.LPAREN) {
+            advance();
+            argListOpt();
+            match(Names.RPAREN);
+         }
+      }
+   }
+
+   private void ifStat() {
+      if (this.lToken.getName() == Names.IF) {
+         advance();
+         if (this.lToken.getName() == Names.LPAREN) {
+            advance();
+            expression();
+            match(Names.RPAREN);
+            if (this.lToken.getName() == Names.LCBR) {
+               advance();
+               statements();
+               match(Names.RCBR);
+               ifStat_line();
+            }
+         }
+      }
+   }
+
+   private void ifStat_line() {
+      if (this.lToken.getName() == Names.ELSE) {
+         advance();
+         if (this.lToken.getName() == Names.LCBR) {
+            advance();
+            statements();
+            match(Names.RCBR);
+         }
+      }
+   }
+
+   private void forStat() {
+      if (this.lToken.getName() == Names.FOR) {
+         advance();
+         if (this.lToken.getName() == Names.LPAREN) {
+            advance();
+            atribStatOpt();
+            if (this.lToken.getName() == Names.SEMICOLON) {
+               advance();
+               expressionOpt();
+               if (this.lToken.getName() == Names.SEMICOLON) {
+                  advance();
+                  atribStatOpt();
+                  match(Names.RPAREN);
+                  if (this.lToken.getName() == Names.LCBR) {
+                     advance();
+                     statements();
+                     match(Names.RCBR);
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   private void atribStatOpt() {
+      atribStat();
+   }
+
+   private void expressionOpt() {
+      expression();
+   }
+
+   private void lValue() {
+      if (this.lToken.getName() == Names.ID) {
+         advance();
+         lValue_Line();
+         lValueComp();
+         pilha.push(Gramatica.LVALUE);
+      }
+   }
+
+   private void lValue_Line() {
+      if (this.lToken.getName() == Names.LSBR) {
+         advance();
+         expression();
+         match(Names.RSBR);
+         lValueComp();
+      }
+   }
+
+   private void lValueComp() {
+      if (this.lToken.getName() == Names.DOT) {
+         advance();
+         if (this.lToken.getName() == Names.ID) {
+            advance();
+            lValueComp();
+            lValueComp_line();
+            pilha.push(Gramatica.LVALUECOMP);
+         }
+      }
+   }
+
+   private void lValueComp_line() {
+      if (this.lToken.getName() == Names.LSBR) {
+         advance();
+         expression();
+         match(Names.RSBR);
+         lValueComp();
+      }
    }
 
    private void expression() {
@@ -53,6 +428,31 @@ public class Parser {
       if (this.lToken.getName() == Names.RELOP) {
          advance();
          numExpression();
+      }
+   }
+
+   private void allocExpresion() {
+      if (this.lToken.getName() == Names.NEW) {
+         advance();
+         if (this.lToken.getName() == Names.ID) {
+            advance();
+            if (this.lToken.getName() == Names.LPAREN) {
+               advance();
+               argListOpt();
+               match(Names.RPAREN);
+            }
+         }
+      }
+
+      allocExpresion_line();
+   }
+
+   private void allocExpresion_line() {
+      type();
+      if (this.lToken.getName() == Names.LSBR) {
+         advance();
+         expression();
+         match(Names.RSBR);
       }
    }
 
@@ -107,45 +507,6 @@ public class Parser {
       else if (this.lToken.getName() == Names.ID) {
          lValue();
          pilha.push(Gramatica.FACTOR);
-      }
-   }
-
-   private void lValue() {
-      if (this.lToken.getName() == Names.ID) {
-         advance();
-         lValue_Line();
-         lValueComp();
-         pilha.push(Gramatica.LVALUE);
-      }
-   }
-
-   private void lValue_Line() {
-      if (this.lToken.getName() == Names.LSBR) {
-         advance();
-         expression();
-         match(Names.RSBR);
-         lValueComp();
-      }
-   }
-
-   private void lValueComp() {
-      if (this.lToken.getName() == Names.DOT) {
-         advance();
-         if (this.lToken.getName() == Names.ID) {
-            advance();
-            lValueComp();
-            lValueComp_line();
-            pilha.push(Gramatica.LVALUECOMP);
-         }
-      }
-   }
-
-   private void lValueComp_line() {
-      if (this.lToken.getName() == Names.LSBR) {
-         advance();
-         expression();
-         match(Names.RSBR);
-         lValueComp();
       }
    }
 
