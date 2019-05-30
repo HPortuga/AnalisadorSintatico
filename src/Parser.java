@@ -52,7 +52,7 @@ public class Parser {
          if (this.lToken.getName() == Names.ID) {
             advance();
             classDecl_line();
-//            classBody();
+            classBody();
          }
       }
    }
@@ -62,7 +62,6 @@ public class Parser {
          advance();
          if (this.lToken.getName() == Names.ID) {
             advance();
-//            classBody();
          }
       }
    }
@@ -70,9 +69,30 @@ public class Parser {
    private void classBody() {
       if (this.lToken.getName() == Names.LCBR) {
          advance();
-         varDeclListOpt();
-         constructDeclListOpt();
-         methodDeclListOpt();
+
+         if (this.lToken.getName() == Names.INT
+         || this.lToken.getName() == Names.STRING
+         || this.lToken.getName() == Names.ID) {
+            advance();
+
+            if (this.lToken.getName() == Names.LPAREN) {
+               methodDeclListOpt();
+               return;
+            } else
+               varDeclListOpt();
+         }
+
+         if (this.lToken.getName() == Names.CONSTRUCTOR)
+            constructDeclListOpt();
+
+         if (this.lToken.getName() == Names.INT
+               || this.lToken.getName() == Names.STRING
+               || this.lToken.getName() == Names.ID) {
+            advance();
+
+            if (this.lToken.getName() == Names.LPAREN)
+               methodDeclListOpt();
+         }
          match(Names.RCBR);
       }
    }
@@ -83,34 +103,31 @@ public class Parser {
 
    private void varDeclList() {
       varDecl();
-      varDeclList_line();
+      if (this.lToken.getName() == Names.INT
+      || this.lToken.getName() == Names.STRING
+      || this.lToken.getName() == Names.ID)
+         varDeclList_line();
    }
 
    private void varDeclList_line() {
       varDeclList();
-      varDecl();
    }
 
    private void varDecl() {
       type();
-      varDecl_line();
-   }
 
-   private void varDecl_line() {
-      if (this.lToken.getName() == Names.ID) {
-         advance();
-         varDeclOpt();
-         match(Names.SEMICOLON);
-      }
-      else if (this.lToken.getName() == Names.LSBR) {
+      if (this.lToken.getName() == Names.LSBR) {
          advance();
          match(Names.RSBR);
-         if (this.lToken.getName() == Names.ID) {
-            advance();
+      }
+
+      if (this.lToken.getName() == Names.ID) {
+         advance();
+         if (this.lToken.getName() == Names.COMMA) {
             varDeclOpt();
-            match(Names.SEMICOLON);
          }
       }
+      match(Names.SEMICOLON);
    }
 
    private void varDeclOpt() {
