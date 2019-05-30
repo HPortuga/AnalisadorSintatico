@@ -1,3 +1,4 @@
+import javax.naming.Name;
 import java.util.Stack;
 
 public class Parser {
@@ -5,7 +6,7 @@ public class Parser {
    private Scanner scanner;
    private Stack<Gramatica> pilha;
 
-   public Parser(String input) {
+   Parser(String input) {
       this.scanner = new Scanner(input);
       this.pilha = new Stack<>();
       advance();
@@ -22,20 +23,26 @@ public class Parser {
       else throw new CompilerException("Token inesperado: " + this.lToken.getName());
    }
 
-   public void program() {
-      while (lToken.getName() != Names.EOF) {
-         classList();
-         advance();
-      }
+   String program() {
+         try {
+//            while (lToken.getName() != Names.EOF) {
+               classList();
+//               advance();
+//            }
+            return "Analise sintatica concluida";
+         }
+         catch (CompilerException c) {
+            return c.toString();
+         }
    }
 
    private void classList() {
       classDecl();
-      classList_line();
+      if (this.lToken.getName() == Names.CLASS)
+         classList_line();
    }
 
    private void classList_line() {
-      classDecl();
       classList();
    }
 
@@ -44,24 +51,18 @@ public class Parser {
          advance();
          if (this.lToken.getName() == Names.ID) {
             advance();
-            classBody();
+            classDecl_line();
+//            classBody();
          }
       }
-      classDecl_line();
    }
 
    private void classDecl_line() {
-      if (this.lToken.getName() == Names.CLASS) {
+      if (this.lToken.getName() == Names.EXTENDS) {
          advance();
          if (this.lToken.getName() == Names.ID) {
             advance();
-            if (this.lToken.getName() == Names.EXTENDS) {
-               advance();
-               if (this.lToken.getName() == Names.ID) {
-                  advance();
-                  classBody();
-               }
-            }
+//            classBody();
          }
       }
    }
@@ -452,7 +453,7 @@ public class Parser {
       if (this.lToken.getName() == Names.LSBR) {
          advance();
          expression();
-         match(Names.RSBR);
+         match(Names.RSBR  );
       }
    }
 
