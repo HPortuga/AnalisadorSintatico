@@ -483,18 +483,64 @@ class ParserTest {
       String codigo = "class Fruta { int metodo(string teste) { print } }";
       Parser parser = new Parser(codigo);
 
-      assertThrows(BadStatementException.class, parser::program);
+      assertThrows(BadUnaryExpressionException.class, parser::program);
    }
 
-//   @Test
-//   void deve_reconhecer_corpo_de_metodo_com_statement_print() {
-//      String codigo = "class Fruta { int metodo(string teste) { print; } }";
-//      Parser parser = new Parser(codigo);
-//
-//      String msgRetornada = parser.program();
-//
-//      assertEquals(msgAnaliseConcluida, msgRetornada);
-//   }
+   @Test
+   void deve_reconhecer_factor_inteiro() {
+      String codigo = "class Fruta { int metodo(string teste) { print +5; } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_factor_string_literal() {
+      String codigo = "class Fruta { int metodo(string teste) { print +\"a\"; } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_identificar_erro_fator_expression_sem_RPAREN() {
+      String codigo = "class Fruta { int metodo(string teste) { print +(-5 ; }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadFactorException.class, parser::program);
+   }
+
+   @Test
+   void deve_reconhecer_factor_expressao_entre_parenteses() {
+      String codigo = "class Fruta { int metodo(string teste) { print +(-5); } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_identificar_erro_unary_expression_sem_sinal() {
+      String codigo = "class Fruta { int metodo(string teste) { print 5} }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadUnaryExpressionException.class, parser::program);
+   }
+
+   @Test
+   void deve_reconhecer_corpo_de_metodo_com_statement_print() {
+      String codigo = "class Fruta { int metodo(string teste) { print +5; } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
 //
 //   @Test
 //   void deve_identificar_erro_corpo_de_metodo_com_statement_read_sem_ponto_e_virgula() {

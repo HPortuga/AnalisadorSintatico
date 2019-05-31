@@ -322,10 +322,47 @@ public class Parser {
 
    private void numExpression() {
       term();
+
+      if (this.lToken.getName() == Names.MAIS
+      || this.lToken.getName() == Names.MENOS) {
+         advance();
+         term();
+      }
    }
 
    private void term() {
+      unaryExpression();
 
+      if (this.lToken.getName() == Names.VEZES
+      || this.lToken.getName() == Names.DIVIDIDO
+      || this.lToken.getName() == Names.MOD) {
+         advance();
+         unaryExpression();
+      }
+   }
+
+   private void unaryExpression() {
+      if (this.lToken.getName() == Names.MAIS
+      || this.lToken.getName() == Names.MENOS) {
+         advance();
+         factor();
+      } else throw new BadUnaryExpressionException(null, this.lToken.getName(), this.scanner.getLinha());
+   }
+
+   // falta LValue
+   private void factor() {
+      if (this.lToken.getName() == Names.INTEGER_LITERAL
+      || this.lToken.getName() == Names.STRING_LITERAL)
+         advance();
+
+      if (this.lToken.getName() == Names.LPAREN) {
+         advance();
+         expression();
+
+         if (this.lToken.getName() == Names.RPAREN)
+            advance();
+         else throw new BadFactorException(Names.RPAREN, this.lToken.getName(), this.scanner.getLinha());
+      }
    }
 
    private boolean isFirstDeStatement() {
