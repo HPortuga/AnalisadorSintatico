@@ -3,6 +3,9 @@ package Testes;
 import Dominio.Parser;
 import Exceptions.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.time.DateTimeException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -314,6 +317,64 @@ class ParserTest {
    @Test
    void deve_reconhecer_parametros_no_metodo_construtor() {
       String codigo = "class Fruta { constructor (int []batata, string sanduiche, NovaClasse classe) {} }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_identificar_erro_de_metodo_da_classe_com_parametro_sem_tipo() {
+      String codigo = "class Fruta { int fazer(123); }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadMethodBodyException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_metodo_da_classe_com_parametro_sem_ID() {
+      String codigo = "class Fruta { int fazer(int 123); }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadParamException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_metodo_da_classe_com_parametro_vetor_sem_ID() {
+      String codigo = "class Fruta { int fazer(int []123); }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadParamException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_metodo_da_classe_sem_RPAREN() {
+      String codigo = "class Fruta { int fazer(int[] vetor; }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadMethodBodyException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_metodo_da_classe_sem_LCBR() {
+      String codigo = "class Fruta { int fazer(int[] vetor); }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadMethodBodyException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_metodo_da_classe_sem_RCBR() {
+      String codigo = "class Fruta { int fazer(int[] vetor){; }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadMethodBodyException.class, parser::program);
+   }
+
+   @Test
+   void deve_reconhecer_classe_com_metodo_declarado() {
+      String codigo = "class Fruta { int fazer(int[] vetor){} }";
       Parser parser = new Parser(codigo);
 
       String msgRetornada = parser.program();

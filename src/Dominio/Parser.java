@@ -67,6 +67,7 @@ public class Parser {
 
          varDeclListOpt();
          constructDeclListOpt();
+         methodDeclListOpt();
 
          if (this.lToken.getName() == Names.RCBR)
             advance();
@@ -100,6 +101,7 @@ public class Parser {
 
       if (this.lToken.getName() == Names.LSBR) {
          advance();
+
          if (this.lToken.getName() == Names.RSBR)
             advance();
          else throw new BadVariableException(Names.RSBR, this.lToken.getName(), this.scanner.getLinha());
@@ -111,6 +113,10 @@ public class Parser {
 
       if (this.lToken.getName() == Names.COMMA)
          varDeclOpt();
+      else if (this.lToken.getName() == Names.LPAREN) {
+         methodBody();
+         return;
+      }
 
       if (this.lToken.getName() == Names.SEMICOLON)
          advance();
@@ -160,34 +166,43 @@ public class Parser {
    }
 
    private void methodDeclListOpt() {
-      methodDeclList();
+      if (this.lToken.getName() == Names.INT
+      || this.lToken.getName() == Names.STRING
+      || this.lToken.getName() == Names.ID)
+         methodDeclList();
    }
 
    private void methodDeclList() {
       methodDecl();
-      methodDeclList_line();
+
+      if (this.lToken.getName() == Names.INT
+      || this.lToken.getName() == Names.STRING
+      || this.lToken.getName() == Names.ID)
+         methodDeclList_line();
    }
 
    private void methodDeclList_line() {
       methodDeclList();
-      methodDecl();
    }
 
    private void methodDecl() {
       type();
-      methodDecl_line();
-   }
 
-   private void methodDecl_line() {
-      if (this.lToken.getName() == Names.ID) {
+      if (this.lToken.getName() == Names.LSBR) {
          advance();
-         methodBody();
+
+         if (this.lToken.getName() == Names.RSBR)
+            advance();
+         else throw new BadMethodException(Names.RSBR, this.lToken.getName(), this.scanner.getLinha());
       }
-      else if (this.lToken.getName() == Names.LSBR) {
+
+      if (this.lToken.getName() == Names.ID)
          advance();
-         match(Names.RSBR);
+      else throw new BadMethodException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
+
+      if (this.lToken.getName() == Names.LPAREN)
          methodBody();
-      }
+      else throw new BadMethodException(Names.LPAREN, this.lToken.getName(), this.scanner.getLinha());
    }
 
    private void methodBody() {
