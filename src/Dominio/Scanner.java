@@ -195,7 +195,10 @@ public class Scanner {
                lexema += String.valueOf(chr);
 
                state = 0;
-               return new Token(Names.OPNUM, lexema);
+               if (lexema.equals("+"))
+                  return new Token(Names.MAIS, lexema);
+               else
+                  return new Token(Names.MENOS, lexema);
 
             case 7:  // OPUN
                lexema = "";
@@ -214,7 +217,12 @@ public class Scanner {
                }
 
                state = 0;
-               return new Token(Names.OPUN, lexema);
+               if (lexema.equals("*"))
+                  return new Token(Names.VEZES, lexema);
+               else if (lexema.equals("/"))
+                  return new Token(Names.DIVIDIDO, lexema);
+               else
+                  return new Token(Names.MOD, lexema);
 
             case 8:  // Separador
                lexema = "";

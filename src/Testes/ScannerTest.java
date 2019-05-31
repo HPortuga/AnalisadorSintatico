@@ -200,15 +200,12 @@ class ScannerTest {
    }
 
    @Test
-   void deve_reconhecer_OPNUM() {
-      Scanner scanner = new Scanner("4 + 5 - +-");
+   void deve_reconhecer_MAIS() {
+      Scanner scanner = new Scanner("4 + 5");
       List<String> listaEsperada = Stream.of(
             new Token(Names.INTEGER_LITERAL, "4"),
-            new Token(Names.OPNUM, "+"),
+            new Token(Names.MAIS, "+"),
             new Token(Names.INTEGER_LITERAL, "5"),
-            new Token(Names.OPNUM, "-"),
-            new Token(Names.OPNUM, "+"),
-            new Token(Names.OPNUM, "-"),
             eof)
             .map(Token::toString)
             .collect(Collectors.toList());
@@ -219,17 +216,60 @@ class ScannerTest {
    }
 
    @Test
-   void deve_reconhecer_OPUN() {
-      Scanner scanner = new Scanner("5*4 /% 433 %asd");
+   void deve_reconhecer_MENOS() {
+      Scanner scanner = new Scanner("4 - 5");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.INTEGER_LITERAL, "4"),
+            new Token(Names.MENOS, "-"),
+            new Token(Names.INTEGER_LITERAL, "5"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_VEZES() {
+      Scanner scanner = new Scanner("5*4");
       List<String> listaEsperada = Stream.of(
             new Token(Names.INTEGER_LITERAL, "5"),
-            new Token(Names.OPUN, "*"),
+            new Token(Names.VEZES, "*"),
             new Token(Names.INTEGER_LITERAL, "4"),
-            new Token(Names.OPUN, "/"),
-            new Token(Names.OPUN, "%"),
-            new Token(Names.INTEGER_LITERAL, "433"),
-            new Token(Names.OPUN, "%"),
-            new Token(Names.ID, "asd"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_DIVIDIDO() {
+      Scanner scanner = new Scanner("5/4");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.INTEGER_LITERAL, "5"),
+            new Token(Names.DIVIDIDO, "/"),
+            new Token(Names.INTEGER_LITERAL, "4"),
+            eof)
+            .map(Token::toString)
+            .collect(Collectors.toList());
+
+      List<String> listaRetornada = analisar(scanner, listaEsperada);
+
+      assertIterableEquals(listaEsperada, listaRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_MOD() {
+      Scanner scanner = new Scanner("5%4");
+      List<String> listaEsperada = Stream.of(
+            new Token(Names.INTEGER_LITERAL, "5"),
+            new Token(Names.MOD, "%"),
+            new Token(Names.INTEGER_LITERAL, "4"),
             eof)
             .map(Token::toString)
             .collect(Collectors.toList());
@@ -269,7 +309,7 @@ class ScannerTest {
             new Token(Names.STRING_LITERAL, "\"HAHAHAH 8 9 0 as % 4\""),
             new Token(Names.ID, "as"),
             new Token(Names.INTEGER_LITERAL, "5"),
-            new Token(Names.OPUN, "/"),
+            new Token(Names.DIVIDIDO, "/"),
             eof)
             .map(Token::toString)
             .collect(Collectors.toList());

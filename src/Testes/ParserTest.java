@@ -377,7 +377,7 @@ class ParserTest {
 
    @Test
    void deve_identificar_erro_de_metodo_da_classe_sem_RCBR() {
-      String codigo = "class Fruta { int fazer(int[] vetor){; }";
+      String codigo = "class Fruta { int fazer(int[] vetor){";
       Parser parser = new Parser(codigo);
 
       assertThrows(BadMethodBodyException.class, parser::program);
@@ -449,6 +449,106 @@ class ParserTest {
 
       assertEquals(msgAnaliseConcluida, msgRetornada);
    }
+
+   @Test
+   void deve_reconhecer_corpo_de_metodo_com_statement_ponto_e_virgula() {
+      String codigo = "class Fruta { int metodo(string teste) { ; } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_identificar_erro_corpo_de_metodo_com_statement_break_sem_ponto_e_virgula() {
+      String codigo = "class Fruta { int metodo(string teste) { break } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadStatementException.class, parser::program);
+   }
+
+   @Test
+   void deve_reconhecer_corpo_de_metodo_com_statement_break() {
+      String codigo = "class Fruta { int metodo(string teste) { break; } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_identificar_erro_corpo_de_metodo_com_statement_print_sem_ponto_e_virgula() {
+      String codigo = "class Fruta { int metodo(string teste) { print } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadStatementException.class, parser::program);
+   }
+
+//   @Test
+//   void deve_reconhecer_corpo_de_metodo_com_statement_print() {
+//      String codigo = "class Fruta { int metodo(string teste) { print; } }";
+//      Parser parser = new Parser(codigo);
+//
+//      String msgRetornada = parser.program();
+//
+//      assertEquals(msgAnaliseConcluida, msgRetornada);
+//   }
+//
+//   @Test
+//   void deve_identificar_erro_corpo_de_metodo_com_statement_read_sem_ponto_e_virgula() {
+//      String codigo = "class Fruta { int metodo(string teste) { read } }";
+//      Parser parser = new Parser(codigo);
+//
+//      assertThrows(BadStatementException.class, parser::program);
+//   }
+//
+//   @Test
+//   void deve_reconhecer_corpo_de_metodo_com_statement_read() {
+//      String codigo = "class Fruta { int metodo(string teste) { read; } }";
+//      Parser parser = new Parser(codigo);
+//
+//      String msgRetornada = parser.program();
+//
+//      assertEquals(msgAnaliseConcluida, msgRetornada);
+//   }
+//
+//   @Test
+//   void deve_identificar_erro_corpo_de_metodo_com_statement_return_sem_ponto_e_virgula() {
+//      String codigo = "class Fruta { int metodo(string teste) { return } }";
+//      Parser parser = new Parser(codigo);
+//
+//      assertThrows(BadStatementException.class, parser::program);
+//   }
+//
+//   @Test
+//   void deve_reconhecer_corpo_de_metodo_com_statement_return() {
+//      String codigo = "class Fruta { int metodo(string teste) { return; } }";
+//      Parser parser = new Parser(codigo);
+//
+//      String msgRetornada = parser.program();
+//
+//      assertEquals(msgAnaliseConcluida, msgRetornada);
+//   }
+//
+//   @Test
+//   void deve_identificar_erro_corpo_de_metodo_com_statement_super_sem_ponto_e_virgula() {
+//      String codigo = "class Fruta { int metodo(string teste) { super } }";
+//      Parser parser = new Parser(codigo);
+//
+//      assertThrows(BadStatementException.class, parser::program);
+//   }
+//
+//   @Test
+//   void deve_reconhecer_corpo_de_metodo_com_statement_super() {
+//      String codigo = "class Fruta { int metodo(string teste) { super; } }";
+//      Parser parser = new Parser(codigo);
+//
+//      String msgRetornada = parser.program();
+//
+//      assertEquals(msgAnaliseConcluida, msgRetornada);
+//   }
 }
 
 

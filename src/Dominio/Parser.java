@@ -31,11 +31,7 @@ public class Parser {
    private void classList() {
       classDecl();
       if (this.lToken.getName() != Names.EOF)
-         classList_line();
-   }
-
-   private void classList_line() {
-      classList();
+         classList();
    }
 
    private void classDecl() {
@@ -89,11 +85,7 @@ public class Parser {
       if (this.lToken.getName() == Names.INT
       || this.lToken.getName() == Names.STRING
       || this.lToken.getName() == Names.ID)
-         varDeclList_line();
-   }
-
-   private void varDeclList_line() {
-      varDeclList();
+         varDeclList();
    }
 
    private void varDecl() {
@@ -149,11 +141,7 @@ public class Parser {
    private void constructDeclList() {
       constructDecl();
       if (this.lToken.getName() == Names.CONSTRUCTOR)
-         constructDeclList_line();
-   }
-
-   private void constructDeclList_line() {
-      constructDeclList();
+         constructDeclList();
    }
 
    private void constructDecl() {
@@ -178,11 +166,7 @@ public class Parser {
       if (this.lToken.getName() == Names.INT
       || this.lToken.getName() == Names.STRING
       || this.lToken.getName() == Names.ID)
-         methodDeclList_line();
-   }
-
-   private void methodDeclList_line() {
-      methodDeclList();
+         methodDeclList();
    }
 
    private void methodDecl() {
@@ -217,7 +201,8 @@ public class Parser {
 
          if (this.lToken.getName() == Names.LCBR) {
             advance();
-//            statementsOpt();
+
+            statementsOpt();
 
             if (this.lToken.getName() == Names.RCBR)
                advance();
@@ -236,11 +221,6 @@ public class Parser {
    private void paramList() {
       param();
 
-      if (this.lToken.getName() == Names.COMMA)
-         paramList_line();
-   }
-
-   private void paramList_line() {
       if (this.lToken.getName() == Names.COMMA) {
          advance();
 
@@ -257,6 +237,7 @@ public class Parser {
 
       if (this.lToken.getName() == Names.LSBR) {
          advance();
+
          if (this.lToken.getName() == Names.RSBR)
             advance();
          else throw new BadParamException(Names.RSBR, this.lToken.getName(), this.scanner.getLinha());
@@ -267,78 +248,37 @@ public class Parser {
       else throw new BadParamException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
    }
 
-   private void param_line() {
-      if (this.lToken.getName() == Names.ID)
-         advance();
-      else if (this.lToken.getName() == Names.LSBR) {
-         advance();
-         match(Names.RSBR);
-         if (this.lToken.getName() == Names.ID)
-            advance();
-      }
-   }
-
    private void statementsOpt() {
-      if (this.lToken.getName() != Names.RCBR)
+      if (isFirstDeStatement())
          statements();
    }
 
    private void statements() {
       statement();
-      statements_line();
+
+      if (isFirstDeStatement())
+         statements();
    }
 
-   private void statements_line() {
-      statements();
-      statement();
-   }
+   private void statement() {
+      if (this.lToken.getName() == Names.PRINT) {
+         printStat();
 
-   public void statement() {
-      varDeclList();
-
-      atribStat();
-      if (this.lToken.getName() == Names.SEMICOLON)
-         advance();
-
-      printStat();
-      if (this.lToken.getName() == Names.SEMICOLON)
-         advance();
-
-      readStat();
-      if (this.lToken.getName() == Names.SEMICOLON)
-         advance();
-
-      returnStat();
-      if (this.lToken.getName() == Names.SEMICOLON)
-         advance();
-
-      superStat();
-      if (this.lToken.getName() == Names.SEMICOLON)
-         advance();
-
-      ifStat();
-      forStat();
+         if (this.lToken.getName() == Names.SEMICOLON)
+            advance();
+         else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
+      }
 
       if (this.lToken.getName() == Names.BREAK) {
          advance();
-         match(Names.SEMICOLON);
+
+         if (this.lToken.getName() == Names.SEMICOLON)
+            advance();
+         else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
       }
 
       if (this.lToken.getName() == Names.SEMICOLON)
          advance();
-   }
-
-   private void atribStat() {
-      lValue();
-      if (this.lToken.getName() == Names.ATTR) {
-         advance();
-         atribStat_line();
-      }
-   }
-
-   private void atribStat_line() {
-      expression();
-      allocExpresion();
    }
 
    private void printStat() {
@@ -351,14 +291,14 @@ public class Parser {
    private void readStat() {
       if (this.lToken.getName() == Names.READ) {
          advance();
-         expression();
+//         expression();
       }
    }
 
    private void returnStat() {
       if (this.lToken.getName() == Names.RETURN) {
          advance();
-         expression();
+//         expression();
       }
    }
 
@@ -367,208 +307,39 @@ public class Parser {
          advance();
          if (this.lToken.getName() == Names.LPAREN) {
             advance();
-            argListOpt();
+//            argListOpt();
             match(Names.RPAREN);
          }
-      }
-   }
-
-   private void ifStat() {
-      if (this.lToken.getName() == Names.IF) {
-         advance();
-         if (this.lToken.getName() == Names.LPAREN) {
-            advance();
-            expression();
-            match(Names.RPAREN);
-            if (this.lToken.getName() == Names.LCBR) {
-               advance();
-               statements();
-               match(Names.RCBR);
-               ifStat_line();
-            }
-         }
-      }
-   }
-
-   private void ifStat_line() {
-      if (this.lToken.getName() == Names.ELSE) {
-         advance();
-         if (this.lToken.getName() == Names.LCBR) {
-            advance();
-            statements();
-            match(Names.RCBR);
-         }
-      }
-   }
-
-   private void forStat() {
-      if (this.lToken.getName() == Names.FOR) {
-         advance();
-         if (this.lToken.getName() == Names.LPAREN) {
-            advance();
-            atribStatOpt();
-            if (this.lToken.getName() == Names.SEMICOLON) {
-               advance();
-               expressionOpt();
-               if (this.lToken.getName() == Names.SEMICOLON) {
-                  advance();
-                  atribStatOpt();
-                  match(Names.RPAREN);
-                  if (this.lToken.getName() == Names.LCBR) {
-                     advance();
-                     statements();
-                     match(Names.RCBR);
-                  }
-               }
-            }
-         }
-      }
-   }
-
-   private void atribStatOpt() {
-      atribStat();
-   }
-
-   private void expressionOpt() {
-      expression();
-   }
-
-   private void lValue() {
-      if (this.lToken.getName() == Names.ID) {
-         advance();
-         lValue_Line();
-         lValueComp();
-      }
-   }
-
-   private void lValue_Line() {
-      if (this.lToken.getName() == Names.LSBR) {
-         advance();
-         expression();
-         match(Names.RSBR);
-         lValueComp();
-      }
-   }
-
-   private void lValueComp() {
-      if (this.lToken.getName() == Names.DOT) {
-         advance();
-         if (this.lToken.getName() == Names.ID) {
-            advance();
-            lValueComp();
-            lValueComp_line();
-         }
-      }
-   }
-
-   private void lValueComp_line() {
-      if (this.lToken.getName() == Names.LSBR) {
-         advance();
-         expression();
-         match(Names.RSBR);
-         lValueComp();
       }
    }
 
    private void expression() {
       numExpression();
-      expression_line();
-   }
 
-   private void expression_line() {
-      if (this.lToken.getName() == Names.RELOP) {
-         advance();
-         numExpression();
-      }
-   }
-
-   private void allocExpresion() {
-      if (this.lToken.getName() == Names.NEW) {
-         advance();
-         if (this.lToken.getName() == Names.ID) {
-            advance();
-            if (this.lToken.getName() == Names.LPAREN) {
-               advance();
-               argListOpt();
-               match(Names.RPAREN);
-            }
-         }
-      }
-
-      allocExpresion_line();
-   }
-
-   private void allocExpresion_line() {
-      type();
-      if (this.lToken.getName() == Names.LSBR) {
-         advance();
+      if (this.lToken.getName() == Names.RELOP)
          expression();
-         match(Names.RSBR  );
-      }
    }
 
    private void numExpression() {
       term();
-      numExpression_line();
-   }
-
-   private void numExpression_line() {
-      if (this.lToken.getName() == Names.OPNUM) {
-         advance();
-         term();
-         numExpression_line();
-      }
    }
 
    private void term() {
-      unaryExpression();
-      term_line();
+
    }
 
-   private void term_line() {
-      if (this.lToken.getName() == Names.OPUN) {
-         advance();
-         unaryExpression();
-         term_line();
-      }
-   }
-
-   private void unaryExpression() {
-      if (this.lToken.getName() == Names.OPNUM) {
-         advance();
-         factor();
-      }
-   }
-
-   private void factor() {
-      if (this.lToken.getName() == Names.INTEGER_LITERAL
-            || this.lToken.getName() == Names.STRING) {
-         advance();
-      }
-      else if (this.lToken.getName() == Names.LPAREN) {
-         advance();
-         expression();
-         match(Names.RPAREN);
-      }
-      else if (this.lToken.getName() == Names.ID) {
-         lValue();
-      }
-   }
-
-   private void argListOpt() {
-      argList();
-   }
-
-   private void argList() {
-      expression();
-      argList_line();
-   }
-
-   private void argList_line() {
-      if (this.lToken.getName() == Names.COMMA) {
-         advance();
-         expression();
-      }
+   private boolean isFirstDeStatement() {
+      return (this.lToken.getName() == Names.INT
+            || this.lToken.getName() == Names.STRING
+            || this.lToken.getName() == Names.ID
+            || this.lToken.getName() == Names.PRINT
+            || this.lToken.getName() == Names.READ
+            || this.lToken.getName() == Names.RETURN
+            || this.lToken.getName() == Names.SUPER
+            || this.lToken.getName() == Names.IF
+            || this.lToken.getName() == Names.FOR
+            || this.lToken.getName() == Names.BREAK
+            || this.lToken.getName() == Names.SEMICOLON);
    }
 
 }

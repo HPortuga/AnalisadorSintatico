@@ -5,8 +5,11 @@ public enum Names {
    INTEGER_LITERAL,
    RELOP,
    ATTR,
-   OPNUM,   // + -
-   OPUN,    // * / %
+   MAIS,
+   MENOS,
+   VEZES,
+   DIVIDIDO,
+   MOD,
    LPAREN,
    RPAREN,
    LSBR,
