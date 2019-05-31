@@ -29,7 +29,8 @@ public class Parser {
 
    private void classList() {
       classDecl();
-      classList_line();
+      if (this.lToken.getName() != Names.EOF)
+         classList_line();
    }
 
    private void classList_line() {
