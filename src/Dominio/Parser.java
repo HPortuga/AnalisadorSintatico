@@ -84,6 +84,7 @@ public class Parser {
 
    private void varDeclList() {
       varDecl();
+
       if (this.lToken.getName() == Names.INT
       || this.lToken.getName() == Names.STRING
       || this.lToken.getName() == Names.ID)
@@ -192,6 +193,7 @@ public class Parser {
    private void methodBody() {
       if (this.lToken.getName() == Names.LPAREN) {
          advance();
+
          paramListOpt();
 
          if (this.lToken.getName() == Names.RPAREN)
@@ -218,18 +220,36 @@ public class Parser {
 
    private void paramList() {
       param();
-      paramList_line();
+
+      if (this.lToken.getName() == Names.COMMA)
+         paramList_line();
    }
 
    private void paramList_line() {
-      paramList();
-      if (this.lToken.getName() == Names.COMMA)
-         param();
+      if (this.lToken.getName() == Names.COMMA) {
+         advance();
+
+         if (this.lToken.getName() == Names.INT
+         || this.lToken.getName() == Names.STRING
+         || this.lToken.getName() == Names.ID)
+            paramList();
+         else throw new BadParamException(null, this.lToken.getName(), this.scanner.getLinha());
+      }
    }
 
    private void param() {
       type();
-      param_line();
+
+      if (this.lToken.getName() == Names.LSBR) {
+         advance();
+         if (this.lToken.getName() == Names.RSBR)
+            advance();
+         else throw new BadParamException(Names.RSBR, this.lToken.getName(), this.scanner.getLinha());
+      }
+
+      if (this.lToken.getName() == Names.ID)
+         advance();
+      else throw new BadParamException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
    }
 
    private void param_line() {

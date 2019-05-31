@@ -243,7 +243,83 @@ class ParserTest {
       assertEquals(msgAnaliseConcluida, msgRetornada);
    }
 
+   @Test
+   void deve_identificar_erro_de_parametro_vetor_do_metodo_construdor_sem_RSBR() {
+      String codigo = "class Fruta { constructor (int [[) {} }";
+      Parser parser = new Parser(codigo);
 
+      assertThrows(BadParamException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_parametro_vetor_do_metodo_construtor_sem_ID() {
+      String codigo = "class Fruta { constructor (int [] ) {} }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadParamException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_parametro_do_metodo_construtor_sem_ID() {
+      String codigo = "class Fruta { constructor (int 123) {} }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadParamException.class, parser::program);
+   }
+
+   @Test
+   void deve_reconhecer_parametro_simples_no_metodo_construtor() {
+      String codigo = "class Fruta { constructor (int batata) {} }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_parametro_vetor_no_metodo_construtor() {
+      String codigo = "class Fruta { constructor (int []batata) {} }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_identificar_erro_de_segundo_parametro_do_construtor_sem_Type() {
+      String codigo = "class Fruta { constructor (int 123,) {} }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadParamException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_segundo_parametro_do_construtor_sem_ID() {
+      String codigo = "class Fruta { constructor (int 123, int) {} }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadParamException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_segundo_parametro_vetor_do_construtor_sem_ID() {
+      String codigo = "class Fruta { constructor (int 123, int []) {} }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadParamException.class, parser::program);
+   }
+
+   @Test
+   void deve_reconhecer_parametros_no_metodo_construtor() {
+      String codigo = "class Fruta { constructor (int []batata, string sanduiche, NovaClasse classe) {} }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
 }
 
 
