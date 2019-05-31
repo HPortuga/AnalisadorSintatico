@@ -29,8 +29,7 @@ public class Parser {
 
    private void classList() {
       classDecl();
-      if (this.lToken.getName() == Names.CLASS)
-         classList_line();
+      classList_line();
    }
 
    private void classList_line() {
@@ -45,9 +44,11 @@ public class Parser {
             classDecl_line();
             classBody();
          } else
-            throw new CompilerException("Classe mal formada; Experado: ID, apareceu: " + this.lToken.getName());
+            throw new CompilerException("Classe mal formada; Experado: ID, apareceu: " + this.lToken.getName() +
+                  " na linha " + this.scanner.getLinha());
       } else
-         throw new CompilerException("Classe mal formada; Experado: class, apareceu: " + this.lToken.getName());
+         throw new CompilerException("Classe mal formada; Experado: class, apareceu: " + this.lToken.getName() +
+               " na linha " + this.scanner.getLinha());
    }
 
    private void classDecl_line() {

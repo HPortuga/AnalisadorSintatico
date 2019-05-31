@@ -125,6 +125,13 @@ class ParserTest {
    }
 
    @Test
+   void deve_identificar_segunda_classe_mal_formada() {
+      Parser parser = new Parser("class batata {} 123");
+
+      assertThrows(CompilerException.class, parser::program);
+   }
+
+   @Test
    void deve_identificar_erro_de_classe_mal_formada_em_lista_de_classes() {
       Parser parser = new Parser("class batata {} class cenoura {} class 123 {}");
 

@@ -1,8 +1,7 @@
-import javax.naming.Name;
-
 public class Scanner {
    private String input;
    private int pos;
+   private int linha = 1;
 
    public Scanner(String input) {
       this.input = input;
@@ -13,16 +12,16 @@ public class Scanner {
       return input;
    }
 
-   public void setInput(String input) {
-      this.input = input;
-   }
-
    public int getPos() {
       return pos;
    }
 
    public void setPos(int pos) {
       this.pos = pos;
+   }
+
+   public int getLinha() {
+      return linha;
    }
 
    public Token nextToken() {
@@ -47,8 +46,11 @@ public class Scanner {
 
                else if (Character.isLetter(chr) || isUnderscore(chr))
                   state = 1;
-               else if (chr == ' ' || chr == '\n')
+               else if (chr == ' ' || chr == '\n') {
+                  if (chr == '\n')
+                     linha++;
                   state = 2;
+               }
                else if (Character.isDigit(chr))
                   state = 3;
                else if (chr == '<' || chr == '>' || chr == '!')
@@ -120,8 +122,11 @@ public class Scanner {
             case 2:  // Espaço em branco
                while (getPos() < getInput().length()) {
                   chr = input.charAt(getPos());
-                  if (chr == ' ' || chr == '\n')
+                  if (chr == ' ' || chr == '\n') {
+                     if (chr == '\n')
+                        linha++;
                      incrementPos();
+                  }
                   else
                      break;
                }
@@ -257,6 +262,8 @@ public class Scanner {
                   chr = input.charAt(getPos());
                   incrementPos();
                   if (chr == '\n') {
+                     if (chr == '\n')
+                        linha++;
                      chr = input.charAt(getPos());
                      break;
                   }
@@ -308,4 +315,6 @@ public class Scanner {
       return chr == 'c' || chr == 'e' || chr == 'i' || chr == 's' || chr == 'b' || chr == 'p'
             || chr == 'r' || chr == 'f' || chr == 'n';
    }
+
+
 }
