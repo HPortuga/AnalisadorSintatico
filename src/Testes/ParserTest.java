@@ -1,8 +1,7 @@
 package Testes;
 
-import Exceptions.BadClassException;
-import Exceptions.CompilerException;
 import Dominio.Parser;
+import Exceptions.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,13 +29,6 @@ class ParserTest {
       Parser parser = new Parser("class 123");
 
       assertThrows(BadClassException.class, parser::program);
-   }
-
-   @Test
-   void deve_identificar_erro_de_corpo_de_classe_sem_LCBR() {
-      Parser parser = new Parser("class batata batata");
-
-      assertThrows(CompilerException.class, parser::program);
    }
 
    @Test
@@ -104,6 +96,36 @@ class ParserTest {
    }
 
    @Test
+   void deve_identificar_erro_de_corpo_de_classe_sem_LCBR() {
+      Parser parser = new Parser("class batata batata");
+
+      assertThrows(BadClassBodyException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_corpo_de_classe_sem_RCBR() {
+      Parser parser = new Parser("class batata {");
+
+      assertThrows(BadClassBodyException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_variavel_mal_formada_com_ID_errado() {
+      String codigo = "class Fruta { int 123; }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadVariableException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_variavel_sem_ponto_e_virgula() {
+      String codigo = "class Fruta { int aba }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadVariableException.class, parser::program);
+   }
+
+   @Test
    void deve_reconhecer_declaracao_de_variavel_simples() {
       String codigo =
             "class Fruta {" +
@@ -114,6 +136,14 @@ class ParserTest {
       String msgRetornada = parser.program();
 
       assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_identificar_erro_de_variavel_vetor_sem_RSBR() {
+      String codigo = "class Fruta { int tamanho[; }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadVariableException.class, parser::program);
    }
 
    @Test
@@ -145,6 +175,17 @@ class ParserTest {
    }
 
    @Test
+   void deve_identificar_erro_multiplas_variaveis_sem_ID() {
+      String codigo =
+            "class Fruta {" +
+               "int tamanho, 123, idade;" +
+            "}";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadVariableException.class, parser::program);
+   }
+
+   @Test
    void deve_reconhecer_declaracao_de_multiplas_variaveis_na_mesma_linha() {
       String codigo =
             "class Fruta {" +
@@ -155,6 +196,38 @@ class ParserTest {
       String msgRetornada = parser.program();
 
       assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_identificar_erro_de_construtor_sem_LPAREN() {
+      String codigo = "class Fruta { constructor )( {} }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadConstructorException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_corpo_do_metodo_construtor_sem_RPAREN() {
+      String codigo = "class Fruta { constructor (( {} }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadMethodBodyException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_corpo_do_metodo_construtor_sem_LCBR() {
+      String codigo = "class Fruta { constructor () }} }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadMethodBodyException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_corpo_do_metodo_construtor_sem_RCBR() {
+      String codigo = "class Fruta { constructor () {{ }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadMethodBodyException.class, parser::program);
    }
 
    @Test
@@ -170,23 +243,6 @@ class ParserTest {
       assertEquals(msgAnaliseConcluida, msgRetornada);
    }
 
-   @Test
-   void deve_identificar_erro_quando_constructor_sem_LPAREN() {
-      String codigo =
-            "class Fruta {" +
-               "constructor )( {}" +
-            "}";
-      Parser parser = new Parser(codigo);
-
-      assertThrows(CompilerException.class, parser::program);
-   }
-
-   @Test
-   void deve_identificar_erro_de_corpo_de_classe_sem_RCBR() {
-      Parser parser = new Parser("class batata {");
-
-      assertThrows(CompilerException.class, parser::program);
-   }
 
 }
 

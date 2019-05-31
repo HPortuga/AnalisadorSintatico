@@ -1,20 +1,14 @@
 package Dominio;
 
-import Exceptions.BadClassException;
-import Exceptions.CompilerException;
-import Nomes.Gramatica;
+import Exceptions.*;
 import Nomes.Names;
 
-import java.util.Stack;
-
 public class Parser {
-   private Token lToken;      // Dominio.Token de lookahead
+   private Token lToken;
    private Scanner scanner;
-   private Stack<Gramatica> pilha;
 
    public Parser(String input) {
       this.scanner = new Scanner(input);
-      this.pilha = new Stack<>();
       advance();
    }
 
@@ -71,20 +65,14 @@ public class Parser {
       if (this.lToken.getName() == Names.LCBR) {
          advance();
 
-         if (this.lToken.getName() == Names.INT
-         || this.lToken.getName() == Names.STRING
-         || this.lToken.getName() == Names.ID)
-            varDeclListOpt();
-
-         if (this.lToken.getName() == Names.CONSTRUCTOR)
-            constructDeclListOpt();
+         varDeclListOpt();
+         constructDeclListOpt();
 
          if (this.lToken.getName() == Names.RCBR)
             advance();
-         else throw new CompilerException("Corpo de classe mal formado; Esperado: }, apareceu: " + this.lToken.getName());
-      } else
-         throw new CompilerException("Corpo de classe mal formado; Esperado: {, apareceu: " + this.lToken.getName()
-               + " na linha " + this.scanner.getLinha());
+         else throw new BadClassBodyException(Names.RCBR, this.lToken.getName(), this.scanner.getLinha());
+      } else throw new BadClassBodyException(Names.RCBR, this.lToken.getName(), this.scanner.getLinha());
+
    }
 
    private void varDeclListOpt() {
@@ -111,16 +99,21 @@ public class Parser {
 
       if (this.lToken.getName() == Names.LSBR) {
          advance();
-         match(Names.RSBR);
+         if (this.lToken.getName() == Names.RSBR)
+            advance();
+         else throw new BadVariableException(Names.RSBR, this.lToken.getName(), this.scanner.getLinha());
       }
 
       if (this.lToken.getName() == Names.ID)
          advance();
+      else throw new BadVariableException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
 
       if (this.lToken.getName() == Names.COMMA)
          varDeclOpt();
 
-      match(Names.SEMICOLON);
+      if (this.lToken.getName() == Names.SEMICOLON)
+         advance();
+      else throw new BadVariableException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
    }
 
    private void varDeclOpt() {
@@ -130,6 +123,7 @@ public class Parser {
             advance();
             varDeclOpt();
          }
+         else throw new BadVariableException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
       }
    }
 
@@ -158,7 +152,9 @@ public class Parser {
    private void constructDecl() {
       if (this.lToken.getName() == Names.CONSTRUCTOR) {
          advance();
-         methodBody();
+         if (this.lToken.getName() == Names.LPAREN)
+            methodBody();
+         else throw new BadConstructorException(Names.LPAREN, this.lToken.getName(), this.scanner.getLinha());
       }
    }
 
@@ -197,16 +193,20 @@ public class Parser {
       if (this.lToken.getName() == Names.LPAREN) {
          advance();
          paramListOpt();
-         match(Names.RPAREN);
+
+         if (this.lToken.getName() == Names.RPAREN)
+            advance();
+         else throw new BadMethodBodyException(Names.RPAREN, this.lToken.getName(), this.scanner.getLinha());
+
          if (this.lToken.getName() == Names.LCBR) {
             advance();
-            statementsOpt();
-            match(Names.RCBR);
-         }
+//            statementsOpt();
+
+            if (this.lToken.getName() == Names.RCBR)
+               advance();
+            else throw new BadMethodBodyException(Names.RCBR, this.lToken.getName(), this.scanner.getLinha());
+         } else throw new BadMethodBodyException(Names.LCBR, this.lToken.getName(), this.scanner.getLinha());
       }
-      else
-         throw new CompilerException("Corpo de metodo mal formado; Esperado: (, encontrado: " + this.lToken.getName()
-         + " na linha " + this.scanner.getLinha());
    }
 
    private void paramListOpt() {
@@ -403,7 +403,6 @@ public class Parser {
          advance();
          lValue_Line();
          lValueComp();
-         pilha.push(Gramatica.LVALUE);
       }
    }
 
@@ -423,7 +422,6 @@ public class Parser {
             advance();
             lValueComp();
             lValueComp_line();
-            pilha.push(Gramatica.LVALUECOMP);
          }
       }
    }
@@ -440,7 +438,6 @@ public class Parser {
    private void expression() {
       numExpression();
       expression_line();
-      pilha.push(Gramatica.EXPRESSION);
    }
 
    private void expression_line() {
@@ -478,7 +475,6 @@ public class Parser {
    private void numExpression() {
       term();
       numExpression_line();
-      pilha.push(Gramatica.NUM_EXPRESSION);
    }
 
    private void numExpression_line() {
@@ -492,7 +488,6 @@ public class Parser {
    private void term() {
       unaryExpression();
       term_line();
-      pilha.push(Gramatica.TERM);
    }
 
    private void term_line() {
@@ -507,7 +502,6 @@ public class Parser {
       if (this.lToken.getName() == Names.OPNUM) {
          advance();
          factor();
-         pilha.push(Gramatica.UNARY_EXPRESSION);
       }
    }
 
@@ -515,29 +509,24 @@ public class Parser {
       if (this.lToken.getName() == Names.INTEGER_LITERAL
             || this.lToken.getName() == Names.STRING) {
          advance();
-         pilha.push(Gramatica.FACTOR);
       }
       else if (this.lToken.getName() == Names.LPAREN) {
          advance();
          expression();
          match(Names.RPAREN);
-         pilha.push(Gramatica.FACTOR);
       }
       else if (this.lToken.getName() == Names.ID) {
          lValue();
-         pilha.push(Gramatica.FACTOR);
       }
    }
 
    private void argListOpt() {
       argList();
-      pilha.push(Gramatica.ARGLISTOPT);
    }
 
    private void argList() {
       expression();
       argList_line();
-      pilha.push(Gramatica.ARGLIST);
    }
 
    private void argList_line() {
@@ -547,7 +536,4 @@ public class Parser {
       }
    }
 
-   public Stack<Gramatica> getPilha() {
-      return pilha;
-   }
 }
