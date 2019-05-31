@@ -1,4 +1,3 @@
-import javax.naming.Name;
 import java.util.Stack;
 
 public class Parser {
@@ -23,17 +22,9 @@ public class Parser {
       else throw new CompilerException("Token inesperado: " + this.lToken.getName());
    }
 
-   String program() {
-         try {
-//            while (lToken.getName() != Names.EOF) {
-               classList();
-//               advance();
-//            }
-            return "Analise sintatica concluida";
-         }
-         catch (CompilerException c) {
-            return c.toString();
-         }
+   String program() throws CompilerException {
+      classList();
+      return "Analise sintatica concluida";
    }
 
    private void classList() {
@@ -53,8 +44,10 @@ public class Parser {
             advance();
             classDecl_line();
             classBody();
-         }
-      }
+         } else
+            throw new CompilerException("Classe mal formada; Experado: ID, apareceu: " + this.lToken.getName());
+      } else
+         throw new CompilerException("Classe mal formada; Experado: class, apareceu: " + this.lToken.getName());
    }
 
    private void classDecl_line() {
@@ -62,7 +55,8 @@ public class Parser {
          advance();
          if (this.lToken.getName() == Names.ID) {
             advance();
-         }
+         } else
+            throw new CompilerException("Classe extendida mal formada; Esperado: ID, apareceu: " + this.lToken.getName());
       }
    }
 
@@ -72,33 +66,21 @@ public class Parser {
 
          if (this.lToken.getName() == Names.INT
          || this.lToken.getName() == Names.STRING
-         || this.lToken.getName() == Names.ID) {
+         || this.lToken.getName() == Names.ID)
+            varDeclListOpt();
+
+         if (this.lToken.getName() == Names.RCBR)
             advance();
-
-            if (this.lToken.getName() == Names.LPAREN) {
-               methodDeclListOpt();
-               return;
-            } else
-               varDeclListOpt();
-         }
-
-         if (this.lToken.getName() == Names.CONSTRUCTOR)
-            constructDeclListOpt();
-
-         if (this.lToken.getName() == Names.INT
-               || this.lToken.getName() == Names.STRING
-               || this.lToken.getName() == Names.ID) {
-            advance();
-
-            if (this.lToken.getName() == Names.LPAREN)
-               methodDeclListOpt();
-         }
-         match(Names.RCBR);
-      }
+         else throw new CompilerException("Corpo de classe mal formado; Esperado: }, apareceu: " + this.lToken.getName());
+      } else
+         throw new CompilerException("Corpo de classe mal formado; Esperado: {, apareceu: " + this.lToken.getName());
    }
 
    private void varDeclListOpt() {
-      varDeclList();
+      if (this.lToken.getName() == Names.INT
+      || this.lToken.getName() == Names.STRING
+      || this.lToken.getName() == Names.ID)
+         varDeclList();
    }
 
    private void varDeclList() {
@@ -121,12 +103,12 @@ public class Parser {
          match(Names.RSBR);
       }
 
-      if (this.lToken.getName() == Names.ID) {
+      if (this.lToken.getName() == Names.ID)
          advance();
-         if (this.lToken.getName() == Names.COMMA) {
-            varDeclOpt();
-         }
-      }
+
+      if (this.lToken.getName() == Names.COMMA)
+         varDeclOpt();
+
       match(Names.SEMICOLON);
    }
 
