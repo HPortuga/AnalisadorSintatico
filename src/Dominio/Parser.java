@@ -269,6 +269,30 @@ public class Parser {
          else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
       }
 
+      if (this.lToken.getName() == Names.READ) {
+         readStat();
+
+         if (this.lToken.getName() == Names.SEMICOLON)
+            advance();
+         else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
+      }
+
+      if (this.lToken.getName() == Names.RETURN) {
+         returnStat();
+
+         if (this.lToken.getName() == Names.SEMICOLON)
+            advance();
+         else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
+      }
+
+      if (this.lToken.getName() == Names.SUPER) {
+         superStat();
+
+         if (this.lToken.getName() == Names.SEMICOLON)
+            advance();
+         else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
+      }
+
       if (this.lToken.getName() == Names.BREAK) {
          advance();
 
@@ -291,25 +315,45 @@ public class Parser {
    private void readStat() {
       if (this.lToken.getName() == Names.READ) {
          advance();
-//         expression();
+         expression();
       }
    }
 
    private void returnStat() {
       if (this.lToken.getName() == Names.RETURN) {
          advance();
-//         expression();
+         expression();
       }
    }
 
    private void superStat() {
       if (this.lToken.getName() == Names.SUPER) {
          advance();
+
          if (this.lToken.getName() == Names.LPAREN) {
             advance();
-//            argListOpt();
-            match(Names.RPAREN);
-         }
+
+            argListOpt();
+
+            if (this.lToken.getName() == Names.RPAREN)
+               advance();
+            else throw new BadSuperStatException(Names.RPAREN, this.lToken.getName(), this.scanner.getLinha());
+         } else throw new BadSuperStatException(Names.LPAREN, this.lToken.getName(), this.scanner.getLinha());
+      }
+   }
+
+   private void argListOpt() {
+      if (this.lToken.getName() == Names.MAIS
+      || this.lToken.getName() == Names.MENOS)
+         argList();
+   }
+
+   private void argList() {
+      expression();
+
+      if (this.lToken.getName() == Names.COMMA) {
+         advance();
+         argList();
       }
    }
 
