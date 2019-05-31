@@ -247,7 +247,7 @@ class ParserTest {
    }
 
    @Test
-   void deve_identificar_erro_de_parametro_vetor_do_metodo_construdor_sem_RSBR() {
+   void deve_identificar_erro_de_parametro_vetor_do_metodo_construtor_sem_RSBR() {
       String codigo = "class Fruta { constructor (int [[) {} }";
       Parser parser = new Parser(codigo);
 
@@ -325,6 +325,17 @@ class ParserTest {
    }
 
    @Test
+   void deve_reconhecer_construtores_na_classe() {
+      String codigo = "class Fruta { constructor(int batata){}" +
+            "constructor(string batata){} }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
    void deve_identificar_erro_de_metodo_da_classe_com_parametro_sem_tipo() {
       String codigo = "class Fruta { int fazer(123); }";
       Parser parser = new Parser(codigo);
@@ -375,6 +386,63 @@ class ParserTest {
    @Test
    void deve_reconhecer_classe_com_metodo_declarado() {
       String codigo = "class Fruta { int fazer(int[] vetor){} }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_classe_com_metodos_declarados() {
+      String codigo = "class Fruta { int metodo(string teste){}" +
+            "string metodoComSring(string palavra){}" +
+            "Classe metodoComClasse(Classe classe){} }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_classe_com_variaveis_e_construtor() {
+      String codigo = "class Fruta { int tamanho, peso;" +
+            "constructor(int[] tamanho, int[] peso) {} }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_classe_com_variaveis_e_construtor_e_metodos() {
+      String codigo = "class Fruta {int tamanho;" +
+            "constructor(int tamanho){}" +
+            "int metodo(string teste){} }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_classe_com_variaveis_e_metodos() {
+      String codigo = "class Fruta {int tamanho;" +
+            "int metodo(string teste){} }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_classe_com_construtor_e_metodos() {
+      String codigo = "class Fruta { constructor(int tamanho){}" +
+            "int metodo(string teste){} }";
       Parser parser = new Parser(codigo);
 
       String msgRetornada = parser.program();
