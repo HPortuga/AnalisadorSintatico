@@ -1,11 +1,18 @@
+package Dominio;
+
+import Exceptions.BadClassException;
+import Exceptions.CompilerException;
+import Nomes.Gramatica;
+import Nomes.Names;
+
 import java.util.Stack;
 
 public class Parser {
-   private Token lToken;      // Token de lookahead
+   private Token lToken;      // Dominio.Token de lookahead
    private Scanner scanner;
    private Stack<Gramatica> pilha;
 
-   Parser(String input) {
+   public Parser(String input) {
       this.scanner = new Scanner(input);
       this.pilha = new Stack<>();
       advance();
@@ -19,10 +26,10 @@ public class Parser {
       if (this.lToken.getName() == name) {
          advance();
       }
-      else throw new CompilerException("Token inesperado: " + this.lToken.getName());
+      else throw new CompilerException("Dominio.Token inesperado: " + this.lToken.getName());
    }
 
-   String program() throws CompilerException {
+   public String program() throws CompilerException {
       classList();
       return "Analise sintatica concluida";
    }
@@ -45,11 +52,9 @@ public class Parser {
             classDecl_line();
             classBody();
          } else
-            throw new CompilerException("Classe mal formada; Experado: ID, apareceu: " + this.lToken.getName() +
-                  " na linha " + this.scanner.getLinha());
+            throw new BadClassException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
       } else
-         throw new CompilerException("Classe mal formada; Experado: class, apareceu: " + this.lToken.getName() +
-               " na linha " + this.scanner.getLinha());
+         throw new BadClassException(Names.CLASS, this.lToken.getName(), this.scanner.getLinha());
    }
 
    private void classDecl_line() {
@@ -58,7 +63,7 @@ public class Parser {
          if (this.lToken.getName() == Names.ID) {
             advance();
          } else
-            throw new CompilerException("Classe extendida mal formada; Esperado: ID, apareceu: " + this.lToken.getName());
+            throw new BadClassException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
       }
    }
 
@@ -71,11 +76,15 @@ public class Parser {
          || this.lToken.getName() == Names.ID)
             varDeclListOpt();
 
+         if (this.lToken.getName() == Names.CONSTRUCTOR)
+            constructDeclListOpt();
+
          if (this.lToken.getName() == Names.RCBR)
             advance();
          else throw new CompilerException("Corpo de classe mal formado; Esperado: }, apareceu: " + this.lToken.getName());
       } else
-         throw new CompilerException("Corpo de classe mal formado; Esperado: {, apareceu: " + this.lToken.getName());
+         throw new CompilerException("Corpo de classe mal formado; Esperado: {, apareceu: " + this.lToken.getName()
+               + " na linha " + this.scanner.getLinha());
    }
 
    private void varDeclListOpt() {
@@ -132,17 +141,18 @@ public class Parser {
    }
 
    private void constructDeclListOpt() {
-      constructDeclList();
+      if (this.lToken.getName() == Names.CONSTRUCTOR)
+         constructDeclList();
    }
 
    private void constructDeclList() {
       constructDecl();
-      constructDeclList_line();
+      if (this.lToken.getName() == Names.CONSTRUCTOR)
+         constructDeclList_line();
    }
 
    private void constructDeclList_line() {
       constructDeclList();
-      constructDecl();
    }
 
    private void constructDecl() {
@@ -194,10 +204,16 @@ public class Parser {
             match(Names.RCBR);
          }
       }
+      else
+         throw new CompilerException("Corpo de metodo mal formado; Esperado: (, encontrado: " + this.lToken.getName()
+         + " na linha " + this.scanner.getLinha());
    }
 
    private void paramListOpt() {
-      paramList();
+      if (this.lToken.getName() == Names.INT
+      || this.lToken.getName() == Names.STRING
+      || this.lToken.getName() == Names.ID)
+         paramList();
    }
 
    private void paramList() {
@@ -228,7 +244,8 @@ public class Parser {
    }
 
    private void statementsOpt() {
-      statements();
+      if (this.lToken.getName() != Names.RCBR)
+         statements();
    }
 
    private void statements() {

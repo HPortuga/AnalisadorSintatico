@@ -1,3 +1,8 @@
+package Testes;
+
+import Dominio.Scanner;
+import Dominio.Token;
+import Nomes.Names;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

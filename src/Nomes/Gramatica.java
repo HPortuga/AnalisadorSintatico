@@ -1,3 +1,5 @@
+package Nomes;
+
 public enum Gramatica {
    FACTOR,
    UNARY_EXPRESSION,

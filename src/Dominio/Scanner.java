@@ -1,3 +1,7 @@
+package Dominio;
+
+import Nomes.Names;
+
 public class Scanner {
    private String input;
    private int pos;
@@ -303,7 +307,7 @@ public class Scanner {
    private void incrementPos() { setPos(getPos() + 1); }
 
    private void lexicalError() {
-      System.out.println("Token mal formado");
+      System.out.println("Dominio.Token mal formado");
       System.exit(1);
    }
 

@@ -1,3 +1,7 @@
+package Dominio;
+
+import Nomes.Names;
+
 public class Token {
    private Names name;
    private String lexema;
