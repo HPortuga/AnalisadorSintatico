@@ -269,7 +269,7 @@ public class Parser {
          else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
       }
 
-      if (this.lToken.getName() == Names.READ) {
+      else if (this.lToken.getName() == Names.READ) {
          readStat();
 
          if (this.lToken.getName() == Names.SEMICOLON)
@@ -277,7 +277,7 @@ public class Parser {
          else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
       }
 
-      if (this.lToken.getName() == Names.RETURN) {
+      else if (this.lToken.getName() == Names.RETURN) {
          returnStat();
 
          if (this.lToken.getName() == Names.SEMICOLON)
@@ -285,7 +285,7 @@ public class Parser {
          else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
       }
 
-      if (this.lToken.getName() == Names.SUPER) {
+      else if (this.lToken.getName() == Names.SUPER) {
          superStat();
 
          if (this.lToken.getName() == Names.SEMICOLON)
@@ -293,7 +293,10 @@ public class Parser {
          else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
       }
 
-      if (this.lToken.getName() == Names.BREAK) {
+      else if (this.lToken.getName() == Names.IF)
+         ifStat();
+
+      else  if (this.lToken.getName() == Names.BREAK) {
          advance();
 
          if (this.lToken.getName() == Names.SEMICOLON)
@@ -301,8 +304,10 @@ public class Parser {
          else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
       }
 
-      if (this.lToken.getName() == Names.SEMICOLON)
+      else if (this.lToken.getName() == Names.SEMICOLON)
          advance();
+
+      else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
    }
 
    private void printStat() {
@@ -339,6 +344,32 @@ public class Parser {
                advance();
             else throw new BadSuperStatException(Names.RPAREN, this.lToken.getName(), this.scanner.getLinha());
          } else throw new BadSuperStatException(Names.LPAREN, this.lToken.getName(), this.scanner.getLinha());
+      }
+   }
+
+   private void ifStat() {
+      if (this.lToken.getName() == Names.IF) {
+         advance();
+
+         if (this.lToken.getName() == Names.LPAREN)
+            advance();
+         else throw new BadIfException(Names.LPAREN, this.lToken.getName(), this.scanner.getLinha());
+
+         expression();
+
+         if (this.lToken.getName() == Names.RPAREN)
+            advance();
+         else throw new BadIfException(Names.RPAREN, this.lToken.getName(), this.scanner.getLinha());
+
+         if (this.lToken.getName() == Names.LCBR)
+            advance();
+         else throw new BadIfException(Names.LCBR, this.lToken.getName(), this.scanner.getLinha());
+
+         statements();
+
+         if (this.lToken.getName() == Names.RCBR)
+            advance();
+         else throw new BadIfException(Names.RCBR, this.lToken.getName(), this.scanner.getLinha());
       }
    }
 
@@ -399,7 +430,7 @@ public class Parser {
       || this.lToken.getName() == Names.STRING_LITERAL)
          advance();
 
-      if (this.lToken.getName() == Names.LPAREN) {
+      else if (this.lToken.getName() == Names.LPAREN) {
          advance();
          expression();
 

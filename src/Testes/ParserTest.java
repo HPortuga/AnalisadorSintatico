@@ -612,6 +612,76 @@ class ParserTest {
       assertEquals(msgAnaliseConcluida, msgRetornada);
    }
 
+   @Test
+   void deve_reconhecer_statement_super_com_lista_de_expressoes() {
+      String codigo = "class Fruta { int metodo(string teste) { super(+3, +3); } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_identificar_erro_if_sem_LPAREN() {
+      String codigo = "class Fruta { int metodo(string teste) { if state } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadIfException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_if_sem_expression() {
+      String codigo = "class Fruta { int metodo(string teste) { if () } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadUnaryExpressionException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_if_sem_RPAREN() {
+      String codigo = "class Fruta { int metodo(string teste) { if (+3 } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadIfException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_if_sem_LCBR() {
+      String codigo = "class Fruta { int metodo(string teste) { if (+3) } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadIfException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_if_sem_statements() {
+      String codigo = "class Fruta { int metodo(string teste) { if (+3) { } } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadStatementException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_if_sem_RCBR() {
+      String codigo = "class Fruta { int metodo(string teste) { if (+3) { ; ";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadIfException.class, parser::program);
+   }
+
+   @Test
+   void deve_reconhecer_if() {
+      String codigo = "class Fruta { int metodo(string teste) { if (+3) {;} } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+
+
 }
 
 
