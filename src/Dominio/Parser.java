@@ -296,6 +296,9 @@ public class Parser {
       else if (this.lToken.getName() == Names.IF)
          ifStat();
 
+      else if (this.lToken.getName() == Names.FOR)
+         forStat();
+
       else  if (this.lToken.getName() == Names.BREAK) {
          advance();
 
@@ -370,6 +373,111 @@ public class Parser {
          if (this.lToken.getName() == Names.RCBR)
             advance();
          else throw new BadIfException(Names.RCBR, this.lToken.getName(), this.scanner.getLinha());
+
+         if (this.lToken.getName() == Names.ELSE)
+            ifState_line();
+      }
+   }
+
+   private void ifState_line() {
+      if (this.lToken.getName() == Names.ELSE) {
+         advance();
+
+         if (this.lToken.getName() == Names.LCBR) {
+            advance();
+
+            statements();
+
+            if (this.lToken.getName() == Names.RCBR)
+               advance();
+            else throw new BadIfException(Names.RCBR, this.lToken.getName(), this.scanner.getLinha());
+         } else throw new BadIfException(Names.RCBR, this.lToken.getName(), this.scanner.getLinha());
+      }
+   }
+
+   private void forStat() {
+      if (this.lToken.getName() == Names.FOR) {
+         advance();
+
+         if (this.lToken.getName() == Names.LPAREN)
+            advance();
+         else throw new BadForException(Names.LPAREN, this.lToken.getName(), this.scanner.getLinha());
+
+         atribStatOpt();
+
+         if (this.lToken.getName() == Names.SEMICOLON)
+            advance();
+         else throw new BadForException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
+
+         expressionOpt();
+
+         if (this.lToken.getName() == Names.SEMICOLON)
+            advance();
+         else throw new BadForException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
+
+         atribStatOpt();
+
+         if (this.lToken.getName() == Names.RPAREN)
+            advance();
+         else throw new BadForException(Names.RPAREN, this.lToken.getName(), this.scanner.getLinha());
+
+         if (this.lToken.getName() == Names.LCBR)
+            advance();
+         else throw new BadForException(Names.LCBR, this.lToken.getName(), this.scanner.getLinha());
+
+         statements();
+
+         if (this.lToken.getName() == Names.RCBR)
+            advance();
+         else throw new BadForException(Names.RCBR, this.lToken.getName(), this.scanner.getLinha());
+
+      }
+   }
+
+   private void atribStatOpt() {
+      if (this.lToken.getName() == Names.ID)
+         atribStat();
+   }
+
+   private void atribStat() {
+      lValue();
+
+      if (this.lToken.getName() == Names.ATTR)
+         advance();
+      else throw new BadAtribStatException(Names.ATTR, this.lToken.getName(), this.scanner.getLinha());
+
+      if (this.lToken.getName() == Names.MAIS
+      || this.lToken.getName() == Names.MENOS)
+         expression();
+      else if (this.lToken.getName() == Names.NEW)
+         allocExpression();
+      else throw new BadAtribStatException(Names.MAIS, this.lToken.getName(), this.scanner.getLinha());
+
+   }
+
+   private void allocExpression() {
+   }
+
+   private void lValue() {
+      if (this.lToken.getName() == Names.ID) {
+         advance();
+
+         if (this.lToken.getName() == Names.LSBR) {
+            advance();
+            expression();
+
+            if (this.lToken.getName() == Names.RSBR)
+               advance();
+            else throw new BadLeftValueException(Names.RSBR, this.lToken.getName(), this.scanner.getLinha());
+         }
+
+         if (this.lToken.getName() == Names.DOT) {
+            advance();
+
+            if (this.lToken.getName() == Names.ID)
+               lValue();
+            else throw new BadLeftValueException(Names.RSBR, this.lToken.getName(), this.scanner.getLinha());
+         }
       }
    }
 
@@ -386,6 +494,12 @@ public class Parser {
          advance();
          argList();
       }
+   }
+
+   private void expressionOpt() {
+      if (this.lToken.getName() == Names.MAIS
+      || this.lToken.getName() == Names.MENOS)
+         expression();
    }
 
    private void expression() {

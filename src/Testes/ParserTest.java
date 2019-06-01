@@ -680,6 +680,29 @@ class ParserTest {
       assertEquals(msgAnaliseConcluida, msgRetornada);
    }
 
+   @Test
+   void deve_identificar_erro_if_else_sem_LCBR() {
+      String codigo = "class Fruta { int metodo(string teste) { if (+3) {;} else } ";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadIfException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_if_else_sem_statements() {
+      String codigo = "class Fruta { int metodo(string teste) { if (+3) {;} else { } } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadStatementException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_if_else_sem_RCBR() {
+      String codigo = "class Fruta { int metodo(string teste) { if (+3) {;} else { ;";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadIfException.class, parser::program);
+   }
 
 
 }
