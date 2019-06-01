@@ -19,8 +19,7 @@ public class Parser {
    private void match(Names name) {
       if (this.lToken.getName() == name) {
          advance();
-      }
-      else throw new CompilerException("Dominio.Token inesperado: " + this.lToken.getName());
+      } else throw new CompilerException("Dominio.Token inesperado: " + this.lToken.getName());
    }
 
    public String program() throws CompilerException {
@@ -74,8 +73,8 @@ public class Parser {
 
    private void varDeclListOpt() {
       if (this.lToken.getName() == Names.INT
-      || this.lToken.getName() == Names.STRING
-      || this.lToken.getName() == Names.ID)
+            || this.lToken.getName() == Names.STRING
+            || this.lToken.getName() == Names.ID)
          varDeclList();
    }
 
@@ -83,8 +82,8 @@ public class Parser {
       varDecl();
 
       if (this.lToken.getName() == Names.INT
-      || this.lToken.getName() == Names.STRING
-      || this.lToken.getName() == Names.ID)
+            || this.lToken.getName() == Names.STRING
+            || this.lToken.getName() == Names.ID)
          varDeclList();
    }
 
@@ -121,15 +120,14 @@ public class Parser {
          if (this.lToken.getName() == Names.ID) {
             advance();
             varDeclOpt();
-         }
-         else throw new BadVariableException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
+         } else throw new BadVariableException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
       }
    }
 
    private void type() {
       if (this.lToken.getName() == Names.INT
-      || this.lToken.getName() == Names.STRING
-      || this.lToken.getName() == Names.ID)
+            || this.lToken.getName() == Names.STRING
+            || this.lToken.getName() == Names.ID)
          advance();
    }
 
@@ -155,8 +153,8 @@ public class Parser {
 
    private void methodDeclListOpt() {
       if (this.lToken.getName() == Names.INT
-      || this.lToken.getName() == Names.STRING
-      || this.lToken.getName() == Names.ID)
+            || this.lToken.getName() == Names.STRING
+            || this.lToken.getName() == Names.ID)
          methodDeclList();
    }
 
@@ -164,8 +162,8 @@ public class Parser {
       methodDecl();
 
       if (this.lToken.getName() == Names.INT
-      || this.lToken.getName() == Names.STRING
-      || this.lToken.getName() == Names.ID)
+            || this.lToken.getName() == Names.STRING
+            || this.lToken.getName() == Names.ID)
          methodDeclList();
    }
 
@@ -213,8 +211,8 @@ public class Parser {
 
    private void paramListOpt() {
       if (this.lToken.getName() == Names.INT
-      || this.lToken.getName() == Names.STRING
-      || this.lToken.getName() == Names.ID)
+            || this.lToken.getName() == Names.STRING
+            || this.lToken.getName() == Names.ID)
          paramList();
    }
 
@@ -225,8 +223,8 @@ public class Parser {
          advance();
 
          if (this.lToken.getName() == Names.INT
-         || this.lToken.getName() == Names.STRING
-         || this.lToken.getName() == Names.ID)
+               || this.lToken.getName() == Names.STRING
+               || this.lToken.getName() == Names.ID)
             paramList();
          else throw new BadParamException(null, this.lToken.getName(), this.scanner.getLinha());
       }
@@ -267,47 +265,37 @@ public class Parser {
          if (this.lToken.getName() == Names.SEMICOLON)
             advance();
          else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
-      }
-
-      else if (this.lToken.getName() == Names.READ) {
+      } else if (this.lToken.getName() == Names.READ) {
          readStat();
 
          if (this.lToken.getName() == Names.SEMICOLON)
             advance();
          else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
-      }
-
-      else if (this.lToken.getName() == Names.RETURN) {
+      } else if (this.lToken.getName() == Names.RETURN) {
          returnStat();
 
          if (this.lToken.getName() == Names.SEMICOLON)
             advance();
          else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
-      }
-
-      else if (this.lToken.getName() == Names.SUPER) {
+      } else if (this.lToken.getName() == Names.SUPER) {
          superStat();
 
          if (this.lToken.getName() == Names.SEMICOLON)
             advance();
          else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
-      }
-
-      else if (this.lToken.getName() == Names.IF)
+      } else if (this.lToken.getName() == Names.IF)
          ifStat();
 
       else if (this.lToken.getName() == Names.FOR)
          forStat();
 
-      else  if (this.lToken.getName() == Names.BREAK) {
+      else if (this.lToken.getName() == Names.BREAK) {
          advance();
 
          if (this.lToken.getName() == Names.SEMICOLON)
             advance();
          else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
-      }
-
-      else if (this.lToken.getName() == Names.SEMICOLON)
+      } else if (this.lToken.getName() == Names.SEMICOLON)
          advance();
 
       else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
@@ -447,15 +435,53 @@ public class Parser {
       else throw new BadAtribStatException(Names.ATTR, this.lToken.getName(), this.scanner.getLinha());
 
       if (this.lToken.getName() == Names.MAIS
-      || this.lToken.getName() == Names.MENOS)
+            || this.lToken.getName() == Names.MENOS)
          expression();
-      else if (this.lToken.getName() == Names.NEW)
+      else if (this.lToken.getName() == Names.NEW
+            || this.lToken.getName() == Names.INT
+            || this.lToken.getName() == Names.STRING_LITERAL
+            || this.lToken.getName() == Names.ID)
          allocExpression();
       else throw new BadAtribStatException(Names.MAIS, this.lToken.getName(), this.scanner.getLinha());
 
    }
 
    private void allocExpression() {
+      if (this.lToken.getName() == Names.NEW) {
+         advance();
+
+         if (this.lToken.getName() == Names.ID) {
+            advance();
+
+            if (this.lToken.getName() == Names.LPAREN) {
+               advance();
+
+               argListOpt();
+
+               if (this.lToken.getName() == Names.RPAREN)
+                  advance();
+               else throw new BadAllocExpressionException(Names.RPAREN, this.lToken.getName(), this.scanner.getLinha());
+
+            } else throw new BadAllocExpressionException(Names.LPAREN, this.lToken.getName(), this.scanner.getLinha());
+
+         } else throw new BadAllocExpressionException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
+
+      } else if (this.lToken.getName() == Names.INT
+            || this.lToken.getName() == Names.STRING_LITERAL
+            || this.lToken.getName() == Names.ID) {
+         advance();
+
+         if (this.lToken.getName() == Names.LSBR) {
+            advance();
+
+            expression();
+
+            if (this.lToken.getName() == Names.RSBR)
+               advance();
+            else throw new BadAllocExpressionException(Names.RSBR, this.lToken.getName(), this.scanner.getLinha());
+
+         } else throw new BadAllocExpressionException(Names.LSBR, this.lToken.getName(), this.scanner.getLinha());
+      }
    }
 
    private void lValue() {
@@ -483,7 +509,7 @@ public class Parser {
 
    private void argListOpt() {
       if (this.lToken.getName() == Names.MAIS
-      || this.lToken.getName() == Names.MENOS)
+            || this.lToken.getName() == Names.MENOS)
          argList();
    }
 
@@ -498,7 +524,7 @@ public class Parser {
 
    private void expressionOpt() {
       if (this.lToken.getName() == Names.MAIS
-      || this.lToken.getName() == Names.MENOS)
+            || this.lToken.getName() == Names.MENOS)
          expression();
    }
 
@@ -513,7 +539,7 @@ public class Parser {
       term();
 
       if (this.lToken.getName() == Names.MAIS
-      || this.lToken.getName() == Names.MENOS) {
+            || this.lToken.getName() == Names.MENOS) {
          advance();
          term();
       }
@@ -523,8 +549,8 @@ public class Parser {
       unaryExpression();
 
       if (this.lToken.getName() == Names.VEZES
-      || this.lToken.getName() == Names.DIVIDIDO
-      || this.lToken.getName() == Names.MOD) {
+            || this.lToken.getName() == Names.DIVIDIDO
+            || this.lToken.getName() == Names.MOD) {
          advance();
          unaryExpression();
       }
@@ -532,7 +558,7 @@ public class Parser {
 
    private void unaryExpression() {
       if (this.lToken.getName() == Names.MAIS
-      || this.lToken.getName() == Names.MENOS) {
+            || this.lToken.getName() == Names.MENOS) {
          advance();
          factor();
       } else throw new BadUnaryExpressionException(null, this.lToken.getName(), this.scanner.getLinha());
@@ -541,7 +567,7 @@ public class Parser {
    // falta LValue
    private void factor() {
       if (this.lToken.getName() == Names.INTEGER_LITERAL
-      || this.lToken.getName() == Names.STRING_LITERAL)
+            || this.lToken.getName() == Names.STRING_LITERAL)
          advance();
 
       else if (this.lToken.getName() == Names.LPAREN) {

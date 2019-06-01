@@ -704,7 +704,122 @@ class ParserTest {
       assertThrows(BadIfException.class, parser::program);
    }
 
+   @Test
+   void deve_reconhecer_if_else() {
+      String codigo = "class Fruta { int metodo(string teste) { if (+3) {;} else {;} }}";
+      Parser parser = new Parser(codigo);
 
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_identificar_erro_for_sem_LPAREN() {
+      String codigo = "class Fruta {int metodo(string teste) {for a } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadForException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_for_com_atrib_sem_ponto_e_virgula() {
+      String codigo = "class Fruta {int metodo(string teste) {for (count = +1 } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadForException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_for_com_expression_sem_ponto_e_virgula() {
+      String codigo = "class Fruta {int metodo(string teste) {for (; +1 } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadForException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_for_sem_RPAREN() {
+      String codigo = "class Fruta {int metodo(string teste) {for (;; } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadForException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_for_sem_LCBR() {
+      String codigo = "class Fruta {int metodo(string teste) {for (;;) } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadForException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_for_sem_statement() {
+      String codigo = "class Fruta {int metodo(string teste) {for (;;){ } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadStatementException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_for_sem_RCBR() {
+      String codigo = "class Fruta {int metodo(string teste) {for (;;) {;";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadForException.class, parser::program);
+   }
+
+   @Test
+   void deve_reconhecer_for_com_parenteses_vazios() {
+      String codigo = "class Fruta {int metodo(string teste) {for (;;) {;} } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_for_com_primeiro_parametro_nos_parenteses() {
+      String codigo = "class Fruta {int metodo(string teste) {for (batata = new Tuberculo();;) {;} } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_for_com_segunto_parametro_nos_parenteses() {
+      String codigo = "class Fruta {int metodo(string teste) {for (;+5+-4;) {;} } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_for_com_terceiro_parametro_nos_parenteses() {
+      String codigo = "class Fruta {int metodo(string teste) {for (;;batata = int[+5]) {;} } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_for_completo() {
+      String codigo = "class Fruta {int metodo(string teste) {for (batata = new Tuberculo();+5+-4;batata = int[+5]) " +
+            "{super();} } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
 }
 
 
