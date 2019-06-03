@@ -39,4 +39,43 @@ abstract class IsFirst {
             || next == Names.BREAK || next == Names.SEMICOLON);
    }
 
+   static boolean atribStat(Names next) {
+      return (next == Names.ID);
+   }
+
+   static boolean print(Names next) {
+      return (next == Names.PRINT);
+   }
+
+   static boolean read(Names next) {
+      return (next == Names.READ);
+   }
+
+   static boolean returnStat(Names next) {
+      return (next == Names.RETURN);
+   }
+
+   static boolean superStat(Names next) {
+      return (next == Names.SUPER);
+   }
+
+   static boolean ifStat(Names next) {
+      return (next == Names.IF);
+   }
+
+   static boolean forStat(Names next) {
+      return (next == Names.FOR);
+   }
+
+   static boolean breakStat(Names next) {
+      return (next == Names.BREAK);
+   }
+
+   static boolean unaryExpression(Names next) {
+      return (next == Names.MAIS || next == Names.MENOS);
+   }
+
+   static boolean allocExpression(Names next) {
+      return (next == Names.NEW || type(next));
+   }
 }
