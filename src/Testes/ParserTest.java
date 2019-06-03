@@ -557,7 +557,130 @@ class ParserTest {
             "int[] size, color;" +
             "string descricao; } }";
       Parser parser = new Parser(codigo);
-      
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_identificar_erro_lValue_sem_expression() {
+      String codigo = "class Fruta { int metodo(string teste) {" +
+            "batata[ = +5 } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadUnaryExpressionException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_lValue_sem_RSBR() {
+      String codigo = "class Fruta { int metodo(string teste) {" +
+            "batata[+5 = +5 } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadLeftValueException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_lValue_com_ponto_sem_ID() {
+      String codigo = "class Fruta { int metodo(string teste) {" +
+            "batata[+5]. = +5 } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadLeftValueException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_atrib_stat_sem_ATTR() {
+      String codigo = "class Fruta { int metodo(string teste) {" +
+            "batata[+5] +5 } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadAtribStatException.class, parser::program);
+   }
+
+   @Test
+   void deve_reconhecer_statement_atrib_com_expression() {
+      String codigo = "class Fruta { int metodo(string teste) {" +
+            "batata[+5] = +5 } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_identificar_erro_alloc_new_sem_ID() {
+      String codigo = "class Fruta { int metodo(string teste) {" +
+            "batata = new () } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadAllocExpressionException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_alloc_new_sem_LPAREN() {
+      String codigo = "class Fruta { int metodo(string teste) {" +
+            "batata = new batata) } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadAllocExpressionException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_alloc_new_sem_RPAREN() {
+      String codigo = "class Fruta { int metodo(string teste) {" +
+            "batata = new batata( } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadAllocExpressionException.class, parser::program);
+   }
+
+   @Test
+   void deve_reconhecer_alloc_new() {
+      String codigo = "class Fruta { int metodo(string teste) {" +
+            "batata = new batata() } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_identificar_erro_alloc_type_sem_LSBR() {
+      String codigo = "class Fruta { int metodo(string teste) {" +
+            "batata = int ] } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadAllocExpressionException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_alloc_type_sem_expression() {
+      String codigo = "class Fruta { int metodo(string teste) {" +
+            "batata = int [] } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadUnaryExpressionException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_alloc_type_sem_RSBR() {
+      String codigo = "class Fruta { int metodo(string teste) {" +
+            "batata = int [+5 } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadAllocExpressionException.class, parser::program);
+   }
+
+   @Test
+   void deve_reconhecer_alloc_type() {
+      String codigo = "class Fruta { int metodo(string teste) {" +
+            "batata = int [+5] } }";
+      Parser parser = new Parser(codigo);
+
       String msgRetornada = parser.program();
 
       assertEquals(msgAnaliseConcluida, msgRetornada);
@@ -569,6 +692,37 @@ class ParserTest {
       Parser parser = new Parser(codigo);
 
       assertThrows(BadIfException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_variavel_em_statement_sem_ID() {
+      String codigo = "class Fruta { int metodo(string teste) {" +
+            "int 123; } }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadVariableException.class, parser::program);
+   }
+
+   @Test
+   void deve_reconhecer_variavel_em_statement() {
+      String codigo = "class Fruta { int metodo(string teste) {" +
+            "int batata; } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_variavel_comecando_com_ID_num_statement() {
+      String codigo = "class Fruta { int metodo(string teste) {" +
+            "batata batata; } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
    }
 
    @Test

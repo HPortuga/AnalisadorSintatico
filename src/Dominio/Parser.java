@@ -113,6 +113,10 @@ public class Parser {
          else throw new BadVariableException(Names.RSBR, this.getLookahead(), this.scanner.getLinha());
       }
 
+      varDecl_line();
+   }
+
+   private void varDecl_line() {
       if (this.getLookahead() == Names.ID)
          advance();
       else throw new BadVariableException(Names.ID, this.getLookahead(), this.scanner.getLinha());
@@ -268,7 +272,15 @@ public class Parser {
    }
 
    private void statement() {
-      if (IsFirst.type(this.getLookahead()))
+      if (this.getLookahead() == Names.ID) {
+         atribStat();
+
+         if (this.encontrouAmbiguidade) {
+            toggleEncontrouAmbiguidade();
+            varDecl_line();
+         }
+      }
+      else if (IsFirst.type(this.getLookahead()))
          varDeclList();
 
       else if (this.lToken.getName() == Names.PRINT) {
@@ -452,6 +464,9 @@ public class Parser {
    private void atribStat() {
       lValue();
 
+      if (this.encontrouAmbiguidade)
+         return;
+
       if (this.lToken.getName() == Names.ATTR)
          advance();
       else throw new BadAtribStatException(Names.ATTR, this.lToken.getName(), this.scanner.getLinha());
@@ -510,8 +525,19 @@ public class Parser {
       if (this.lToken.getName() == Names.ID) {
          advance();
 
+         if (this.lToken.getName() == Names.ID) {
+            this.toggleEncontrouAmbiguidade();
+            return;
+         }
+
          if (this.lToken.getName() == Names.LSBR) {
             advance();
+
+            if (this.getLookahead() == Names.RSBR) {
+               this.toggleEncontrouAmbiguidade();
+               return;
+            }
+
             expression();
 
             if (this.lToken.getName() == Names.RSBR)
