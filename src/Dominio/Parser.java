@@ -6,6 +6,7 @@ import Nomes.Names;
 public class Parser {
    private Token lToken;
    private Scanner scanner;
+   private boolean encontrouAmbiguidade = false;
 
    public Parser(String input) {
       this.scanner = new Scanner(input);
@@ -16,274 +17,293 @@ public class Parser {
       this.lToken = this.scanner.nextToken();
    }
 
-   private void match(Names name) {
-      if (this.lToken.getName() == name) {
-         advance();
-      } else throw new CompilerException("Dominio.Token inesperado: " + this.lToken.getName());
-   }
-
    public String program() throws CompilerException {
-      classList();
+      if (IsFirst.classDecl(this.getLookahead()))
+         classList();
+      else if (!IsFirst.classDecl(this.getLookahead()) && !IsFirst.eof(this.getLookahead()))
+         throw new BadProgramException(Names.CLASS, this.getLookahead(), this.scanner.getLinha());
+
       return "Analise sintatica concluida";
    }
 
    private void classList() {
       classDecl();
-      if (this.lToken.getName() != Names.EOF)
+
+      if (!IsFirst.eof(this.getLookahead()))
          classList();
    }
 
    private void classDecl() {
-      if (this.lToken.getName() == Names.CLASS) {
+      if (IsFirst.classDecl(this.getLookahead())) {
          advance();
-         if (this.lToken.getName() == Names.ID) {
+
+         if (this.getLookahead() == Names.ID) {
             advance();
+
             classDecl_line();
             classBody();
+
          } else
-            throw new BadClassException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
+            throw new BadClassException(Names.ID, this.getLookahead(), this.scanner.getLinha());
+
       } else
-         throw new BadClassException(Names.CLASS, this.lToken.getName(), this.scanner.getLinha());
+         throw new BadClassException(Names.CLASS, this.getLookahead(), this.scanner.getLinha());
    }
 
    private void classDecl_line() {
       if (this.lToken.getName() == Names.EXTENDS) {
          advance();
+
          if (this.lToken.getName() == Names.ID) {
             advance();
          } else
-            throw new BadClassException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
+            throw new BadClassException(Names.ID, this.getLookahead(), this.scanner.getLinha());
       }
    }
 
    private void classBody() {
-      if (this.lToken.getName() == Names.LCBR) {
+      if (IsFirst.classBody(this.getLookahead())) {
          advance();
 
          varDeclListOpt();
+
+         if (this.encontrouAmbiguidade) {
+            this.toggleEncontrouAmbiguidade();
+            methodBody();
+            methodDeclListOpt();
+
+            if (this.getLookahead() == Names.RCBR)
+               advance();
+            else throw new BadClassBodyException(Names.RCBR, this.getLookahead(), this.scanner.getLinha());
+
+            return;
+         }
+
          constructDeclListOpt();
          methodDeclListOpt();
 
-         if (this.lToken.getName() == Names.RCBR)
+         if (this.getLookahead() == Names.RCBR)
             advance();
-         else throw new BadClassBodyException(Names.RCBR, this.lToken.getName(), this.scanner.getLinha());
-      } else throw new BadClassBodyException(Names.RCBR, this.lToken.getName(), this.scanner.getLinha());
+         else throw new BadClassBodyException(Names.RCBR, this.getLookahead(), this.scanner.getLinha());
+
+      } else throw new BadClassBodyException(Names.RCBR, this.getLookahead(), this.scanner.getLinha());
 
    }
 
    private void varDeclListOpt() {
-      if (this.lToken.getName() == Names.INT
-            || this.lToken.getName() == Names.STRING
-            || this.lToken.getName() == Names.ID)
+      if (IsFirst.type(this.getLookahead()))
          varDeclList();
    }
 
    private void varDeclList() {
       varDecl();
 
-      if (this.lToken.getName() == Names.INT
-            || this.lToken.getName() == Names.STRING
-            || this.lToken.getName() == Names.ID)
+      if (IsFirst.type(this.getLookahead()))
          varDeclList();
    }
 
    private void varDecl() {
       type();
 
-      if (this.lToken.getName() == Names.LSBR) {
+      if (this.getLookahead() == Names.LSBR) {
          advance();
 
-         if (this.lToken.getName() == Names.RSBR)
+         if (this.getLookahead() == Names.RSBR)
             advance();
-         else throw new BadVariableException(Names.RSBR, this.lToken.getName(), this.scanner.getLinha());
+         else throw new BadVariableException(Names.RSBR, this.getLookahead(), this.scanner.getLinha());
       }
 
-      if (this.lToken.getName() == Names.ID)
+      if (this.getLookahead() == Names.ID)
          advance();
-      else throw new BadVariableException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
+      else throw new BadVariableException(Names.ID, this.getLookahead(), this.scanner.getLinha());
 
-      if (this.lToken.getName() == Names.COMMA)
+      if (IsFirst.varDeclOpt(this.getLookahead()))
          varDeclOpt();
-      else if (this.lToken.getName() == Names.LPAREN) {
-         methodBody();
+      else if (this.getLookahead() == Names.LPAREN) {
+         this.toggleEncontrouAmbiguidade();
          return;
       }
 
-      if (this.lToken.getName() == Names.SEMICOLON)
+      if (this.getLookahead() == Names.SEMICOLON)
          advance();
-      else throw new BadVariableException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
+      else throw new BadVariableException(Names.SEMICOLON, this.getLookahead(), this.scanner.getLinha());
    }
 
    private void varDeclOpt() {
-      if (this.lToken.getName() == Names.COMMA) {
+      if (IsFirst.varDeclOpt(this.getLookahead())) {
          advance();
-         if (this.lToken.getName() == Names.ID) {
+
+         if (this.getLookahead() == Names.ID) {
             advance();
             varDeclOpt();
-         } else throw new BadVariableException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
+         } else throw new BadVariableException(Names.ID, this.getLookahead(), this.scanner.getLinha());
       }
    }
 
    private void type() {
-      if (this.lToken.getName() == Names.INT
-            || this.lToken.getName() == Names.STRING
-            || this.lToken.getName() == Names.ID)
+      if (IsFirst.type(this.getLookahead()))
          advance();
    }
 
    private void constructDeclListOpt() {
-      if (this.lToken.getName() == Names.CONSTRUCTOR)
+      if (IsFirst.constructor(this.getLookahead()))
          constructDeclList();
    }
 
    private void constructDeclList() {
       constructDecl();
-      if (this.lToken.getName() == Names.CONSTRUCTOR)
+
+      if (IsFirst.constructor(this.getLookahead()))
          constructDeclList();
    }
 
    private void constructDecl() {
-      if (this.lToken.getName() == Names.CONSTRUCTOR) {
+      if (IsFirst.constructor(this.getLookahead())) {
          advance();
-         if (this.lToken.getName() == Names.LPAREN)
+
+         if (IsFirst.methodBody(this.getLookahead()))
             methodBody();
-         else throw new BadConstructorException(Names.LPAREN, this.lToken.getName(), this.scanner.getLinha());
+         else throw new BadConstructorException(Names.LPAREN, this.getLookahead(), this.scanner.getLinha());
       }
    }
 
    private void methodDeclListOpt() {
-      if (this.lToken.getName() == Names.INT
-            || this.lToken.getName() == Names.STRING
-            || this.lToken.getName() == Names.ID)
+      if (IsFirst.type(this.getLookahead()))
          methodDeclList();
    }
 
    private void methodDeclList() {
       methodDecl();
 
-      if (this.lToken.getName() == Names.INT
-            || this.lToken.getName() == Names.STRING
-            || this.lToken.getName() == Names.ID)
+      if (IsFirst.type(this.getLookahead()))
          methodDeclList();
    }
 
    private void methodDecl() {
       type();
 
-      if (this.lToken.getName() == Names.LSBR) {
+      if (this.getLookahead() == Names.LSBR) {
          advance();
 
-         if (this.lToken.getName() == Names.RSBR)
+         if (this.getLookahead() == Names.RSBR)
             advance();
-         else throw new BadMethodException(Names.RSBR, this.lToken.getName(), this.scanner.getLinha());
+         else throw new BadMethodException(Names.RSBR, this.getLookahead(), this.scanner.getLinha());
       }
 
-      if (this.lToken.getName() == Names.ID)
+      if (this.getLookahead() == Names.ID)
          advance();
-      else throw new BadMethodException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
+      else throw new BadMethodException(Names.ID, this.getLookahead(), this.scanner.getLinha());
 
-      if (this.lToken.getName() == Names.LPAREN)
+      if (IsFirst.methodBody(this.getLookahead()))
          methodBody();
-      else throw new BadMethodException(Names.LPAREN, this.lToken.getName(), this.scanner.getLinha());
+      else throw new BadMethodException(Names.LPAREN, this.getLookahead(), this.scanner.getLinha());
    }
 
    private void methodBody() {
-      if (this.lToken.getName() == Names.LPAREN) {
+      if (IsFirst.methodBody(this.getLookahead())) {
          advance();
 
          paramListOpt();
 
-         if (this.lToken.getName() == Names.RPAREN)
+         if (this.getLookahead() == Names.RPAREN)
             advance();
-         else throw new BadMethodBodyException(Names.RPAREN, this.lToken.getName(), this.scanner.getLinha());
+         else throw new BadMethodBodyException(Names.RPAREN, this.getLookahead(), this.scanner.getLinha());
 
-         if (this.lToken.getName() == Names.LCBR) {
+         if (this.getLookahead() == Names.LCBR) {
             advance();
 
             statementsOpt();
 
-            if (this.lToken.getName() == Names.RCBR)
+            if (this.getLookahead() == Names.RCBR)
                advance();
-            else throw new BadMethodBodyException(Names.RCBR, this.lToken.getName(), this.scanner.getLinha());
-         } else throw new BadMethodBodyException(Names.LCBR, this.lToken.getName(), this.scanner.getLinha());
+            else throw new BadMethodBodyException(Names.RCBR, this.getLookahead(), this.scanner.getLinha());
+
+         } else throw new BadMethodBodyException(Names.LCBR, this.getLookahead(), this.scanner.getLinha());
       }
    }
 
    private void paramListOpt() {
-      if (this.lToken.getName() == Names.INT
-            || this.lToken.getName() == Names.STRING
-            || this.lToken.getName() == Names.ID)
+      if (IsFirst.type(this.getLookahead()))
          paramList();
    }
 
    private void paramList() {
       param();
 
-      if (this.lToken.getName() == Names.COMMA) {
+      if (this.getLookahead() == Names.COMMA) {
          advance();
 
-         if (this.lToken.getName() == Names.INT
-               || this.lToken.getName() == Names.STRING
-               || this.lToken.getName() == Names.ID)
+         if (IsFirst.type(this.getLookahead()))
             paramList();
-         else throw new BadParamException(null, this.lToken.getName(), this.scanner.getLinha());
+         else throw new BadParamException(null, this.getLookahead(), this.scanner.getLinha());
       }
    }
 
    private void param() {
       type();
 
-      if (this.lToken.getName() == Names.LSBR) {
+      if (this.getLookahead() == Names.LSBR) {
          advance();
 
-         if (this.lToken.getName() == Names.RSBR)
+         if (this.getLookahead() == Names.RSBR)
             advance();
-         else throw new BadParamException(Names.RSBR, this.lToken.getName(), this.scanner.getLinha());
+         else throw new BadParamException(Names.RSBR, this.getLookahead(), this.scanner.getLinha());
       }
 
       if (this.lToken.getName() == Names.ID)
          advance();
-      else throw new BadParamException(Names.ID, this.lToken.getName(), this.scanner.getLinha());
+      else throw new BadParamException(Names.ID, this.getLookahead(), this.scanner.getLinha());
    }
 
    private void statementsOpt() {
-      if (isFirstDeStatement())
+      if (IsFirst.statement(this.getLookahead()))
          statements();
    }
 
    private void statements() {
       statement();
 
-      if (isFirstDeStatement())
+      if (IsFirst.statement(this.getLookahead()))
          statements();
    }
 
    private void statement() {
-      if (this.lToken.getName() == Names.PRINT) {
+      if (IsFirst.type(this.getLookahead()))
+         varDeclList();
+
+      else if (this.lToken.getName() == Names.PRINT) {
          printStat();
 
          if (this.lToken.getName() == Names.SEMICOLON)
             advance();
          else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
-      } else if (this.lToken.getName() == Names.READ) {
+      }
+
+      else if (this.lToken.getName() == Names.READ) {
          readStat();
 
          if (this.lToken.getName() == Names.SEMICOLON)
             advance();
          else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
-      } else if (this.lToken.getName() == Names.RETURN) {
+      }
+
+      else if (this.lToken.getName() == Names.RETURN) {
          returnStat();
 
          if (this.lToken.getName() == Names.SEMICOLON)
             advance();
          else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
-      } else if (this.lToken.getName() == Names.SUPER) {
+      }
+
+      else if (this.lToken.getName() == Names.SUPER) {
          superStat();
 
          if (this.lToken.getName() == Names.SEMICOLON)
             advance();
          else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
-      } else if (this.lToken.getName() == Names.IF)
+      }
+
+      else if (this.lToken.getName() == Names.IF)
          ifStat();
 
       else if (this.lToken.getName() == Names.FOR)
@@ -295,7 +315,9 @@ public class Parser {
          if (this.lToken.getName() == Names.SEMICOLON)
             advance();
          else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
-      } else if (this.lToken.getName() == Names.SEMICOLON)
+      }
+
+      else if (this.lToken.getName() == Names.SEMICOLON)
          advance();
 
       else throw new BadStatementException(Names.SEMICOLON, this.lToken.getName(), this.scanner.getLinha());
@@ -578,6 +600,18 @@ public class Parser {
             advance();
          else throw new BadFactorException(Names.RPAREN, this.lToken.getName(), this.scanner.getLinha());
       }
+   }
+
+   private Names getLookahead() {
+      return this.lToken.getName();
+   }
+
+   public boolean isEncontrouAmbiguidade() {
+      return encontrouAmbiguidade;
+   }
+
+   public void toggleEncontrouAmbiguidade() {
+      this.encontrouAmbiguidade = !this.encontrouAmbiguidade;
    }
 
    private boolean isFirstDeStatement() {

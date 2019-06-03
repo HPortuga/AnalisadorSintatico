@@ -3,9 +3,6 @@ package Testes;
 import Dominio.Parser;
 import Exceptions.*;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import java.time.DateTimeException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,17 +11,19 @@ class ParserTest {
    private String msgAnaliseConcluida = "Analise sintatica concluida";
 
    @Test
-   void deve_identificar_erro_quando_input_vazio() {
-      Parser parser = new Parser("");
+   void deve_identificar_erro_de_programa_mal_formado() {
+      Parser parser = new Parser("batata");
 
-      assertThrows(BadClassException.class, parser::program);
+      assertThrows(BadProgramException.class, parser::program);
    }
 
    @Test
-   void deve_identificar_erro_de_classe_mal_formada() {
-      Parser parser = new Parser("123");
+   void deve_reconhecer_input_vazio() {
+      Parser parser = new Parser("");
 
-      assertThrows(BadClassException.class, parser::program);
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
    }
 
    @Test
@@ -35,17 +34,22 @@ class ParserTest {
    }
 
    @Test
-   void deve_reconhecer_uma_classe_simples() {
-      Parser parser = new Parser("class batata {}");
+   void deve_identificar_erro_de_classe_sem_LCBR() {
+      Parser parser = new Parser("class classe }");
 
-      String msgRetornada = parser.program();
-
-      assertEquals(msgAnaliseConcluida, msgRetornada);
+      assertThrows(BadClassBodyException.class, parser::program);
    }
 
    @Test
-   void deve_reconhecer_uma_classe_extendida() {
-      Parser parser = new Parser("class Fruta {} class Abacaxi extends Fruta {}") ;
+   void deve_identificar_erro_de_classe_sem_RCBR() {
+      Parser parser = new Parser("class classe {");
+
+      assertThrows(BadClassBodyException.class, parser::program);
+   }
+
+   @Test
+   void deve_reconhecer_uma_classe_simples() {
+      Parser parser = new Parser("class batata {}");
 
       String msgRetornada = parser.program();
 
@@ -60,8 +64,8 @@ class ParserTest {
    }
 
    @Test
-   void deve_reconhecer_duas_classes_simples() {
-      Parser parser = new Parser("class batata {} class abacaxi{}");
+   void deve_reconhecer_uma_classe_extendida() {
+      Parser parser = new Parser("class Fruta {} class Abacaxi extends Fruta {}") ;
 
       String msgRetornada = parser.program();
 
@@ -73,15 +77,6 @@ class ParserTest {
       Parser parser = new Parser("class batata {} 123");
 
       assertThrows(BadClassException.class, parser::program);
-   }
-
-   @Test
-   void deve_reconhecer_duas_classes_extendidas() {
-      Parser parser = new Parser("class Fruta {} class Banana extends Fruta {} class DaTerra extends Banana {}");
-
-      String msgRetornada = parser.program();
-
-      assertEquals(msgAnaliseConcluida, msgRetornada);
    }
 
    @Test
@@ -99,42 +94,40 @@ class ParserTest {
    }
 
    @Test
-   void deve_identificar_erro_de_corpo_de_classe_sem_LCBR() {
-      Parser parser = new Parser("class batata batata");
+   void deve_reconhecer_duas_classes_simples() {
+      Parser parser = new Parser("class batata {} class abacaxi{}");
 
-      assertThrows(BadClassBodyException.class, parser::program);
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
    }
 
    @Test
-   void deve_identificar_erro_de_corpo_de_classe_sem_RCBR() {
-      Parser parser = new Parser("class batata {");
+   void deve_reconhecer_duas_classes_extendidas() {
+      Parser parser = new Parser("class Fruta {} class Banana extends Fruta {} class DaTerra extends Banana {}");
 
-      assertThrows(BadClassBodyException.class, parser::program);
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
    }
 
    @Test
-   void deve_identificar_erro_de_variavel_mal_formada_com_ID_errado() {
-      String codigo = "class Fruta { int 123; }";
-      Parser parser = new Parser(codigo);
+   void deve_identificar_erro_de_variavel_com_ID_errado() {
+      Parser parser = new Parser("class Fruta { int 123; }");
 
       assertThrows(BadVariableException.class, parser::program);
    }
 
    @Test
    void deve_identificar_erro_de_variavel_sem_ponto_e_virgula() {
-      String codigo = "class Fruta { int aba }";
-      Parser parser = new Parser(codigo);
+      Parser parser = new Parser("class Fruta { int aba }");
 
       assertThrows(BadVariableException.class, parser::program);
    }
 
    @Test
    void deve_reconhecer_declaracao_de_variavel_simples() {
-      String codigo =
-            "class Fruta {" +
-               "int tamanho;" +
-            "}";
-      Parser parser = new Parser(codigo);
+      Parser parser = new Parser("class Fruta { int tamanho; }");
 
       String msgRetornada = parser.program();
 
@@ -143,19 +136,44 @@ class ParserTest {
 
    @Test
    void deve_identificar_erro_de_variavel_vetor_sem_RSBR() {
-      String codigo = "class Fruta { int tamanho[; }";
-      Parser parser = new Parser(codigo);
+      Parser parser = new Parser("class Fruta { int[ tamanho; }");
+
+      assertThrows(BadVariableException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_variavel_vetor_sem_ID() {
+      Parser parser = new Parser("class Fruta { int[] ; }");
 
       assertThrows(BadVariableException.class, parser::program);
    }
 
    @Test
    void deve_reconhecer_declaracao_de_variavel_vetor() {
-      String codigo =
-            "class Fruta {" +
-               "string[] caracteristicas;" +
-            "}";
-      Parser parser = new Parser(codigo);
+      Parser parser = new Parser("class Fruta { int[] tamanhos; }");
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_identificar_erro_de_lista_de_variavel_sem_ID() {
+      Parser parser = new Parser("class Fruta { int tamanho, 123; }");
+
+      assertThrows(BadVariableException.class, parser::program);
+   }
+
+   @Test
+   void deve_identificar_erro_de_lista_de_variavel_sem_ponto_e_virgula() {
+      Parser parser = new Parser("class Fruta { int tamanho, peso }");
+
+      assertThrows(BadVariableException.class, parser::program);
+   }
+
+   @Test
+   void deve_reconhecer_declaracao_de_lista_de_variaveis() {
+      Parser parser = new Parser("class Fruta { int tamanho, peso, cor; }");
 
       String msgRetornada = parser.program();
 
@@ -164,37 +182,7 @@ class ParserTest {
 
    @Test
    void deve_reconhecer_declaracao_de_mais_de_uma_variavel() {
-      String codigo =
-            "class Fruta {" +
-               "int tamanho;" +
-               "string descricao;" +
-               "Tipos[] tipos;" +
-            "}";
-      Parser parser = new Parser(codigo);
-
-      String msgRetornada = parser.program();
-
-      assertEquals(msgAnaliseConcluida, msgRetornada);
-   }
-
-   @Test
-   void deve_identificar_erro_multiplas_variaveis_sem_ID() {
-      String codigo =
-            "class Fruta {" +
-               "int tamanho, 123, idade;" +
-            "}";
-      Parser parser = new Parser(codigo);
-
-      assertThrows(BadVariableException.class, parser::program);
-   }
-
-   @Test
-   void deve_reconhecer_declaracao_de_multiplas_variaveis_na_mesma_linha() {
-      String codigo =
-            "class Fruta {" +
-               "int tamanho, peso, idade;" +
-            "}";
-      Parser parser = new Parser(codigo);
+      Parser parser = new Parser("class Fruta { int tamanho; string descricao; Tipos[] tipos; }");
 
       String msgRetornada = parser.program();
 
@@ -235,11 +223,7 @@ class ParserTest {
 
    @Test
    void deve_reconhecer_declaracao_de_classe_somente_com_construtor() {
-      String codigo =
-            "class Fruta {" +
-               "constructor () {}" +
-            "}";
-      Parser parser = new Parser(codigo);
+      Parser parser = new Parser("class Fruta { constructor () {} }");
 
       String msgRetornada = parser.program();
 
@@ -487,52 +471,6 @@ class ParserTest {
    }
 
    @Test
-   void deve_reconhecer_factor_inteiro() {
-      String codigo = "class Fruta { int metodo(string teste) { print +5; } }";
-      Parser parser = new Parser(codigo);
-
-      String msgRetornada = parser.program();
-
-      assertEquals(msgAnaliseConcluida, msgRetornada);
-   }
-
-   @Test
-   void deve_reconhecer_factor_string_literal() {
-      String codigo = "class Fruta { int metodo(string teste) { print +\"a\"; } }";
-      Parser parser = new Parser(codigo);
-
-      String msgRetornada = parser.program();
-
-      assertEquals(msgAnaliseConcluida, msgRetornada);
-   }
-
-   @Test
-   void deve_identificar_erro_fator_expression_sem_RPAREN() {
-      String codigo = "class Fruta { int metodo(string teste) { print +(-5 ; }";
-      Parser parser = new Parser(codigo);
-
-      assertThrows(BadFactorException.class, parser::program);
-   }
-
-   @Test
-   void deve_reconhecer_factor_expressao_entre_parenteses() {
-      String codigo = "class Fruta { int metodo(string teste) { print +(-5); } }";
-      Parser parser = new Parser(codigo);
-
-      String msgRetornada = parser.program();
-
-      assertEquals(msgAnaliseConcluida, msgRetornada);
-   }
-
-   @Test
-   void deve_identificar_erro_unary_expression_sem_sinal() {
-      String codigo = "class Fruta { int metodo(string teste) { print 5} }";
-      Parser parser = new Parser(codigo);
-
-      assertThrows(BadUnaryExpressionException.class, parser::program);
-   }
-
-   @Test
    void deve_reconhecer_corpo_de_metodo_com_statement_print() {
       String codigo = "class Fruta { int metodo(string teste) { print +5; } }";
       Parser parser = new Parser(codigo);
@@ -613,10 +551,13 @@ class ParserTest {
    }
 
    @Test
-   void deve_reconhecer_statement_super_com_lista_de_expressoes() {
-      String codigo = "class Fruta { int metodo(string teste) { super(+3, +3); } }";
+   void deve_reconhecer_corpo_de_metodo_com_lista_de_variaveis() {
+      String codigo = "class Frtuta { int metodo(string teste) {" +
+            "int var, go, tam;" +
+            "int[] size, color;" +
+            "string descricao; } }";
       Parser parser = new Parser(codigo);
-
+      
       String msgRetornada = parser.program();
 
       assertEquals(msgAnaliseConcluida, msgRetornada);
@@ -820,20 +761,60 @@ class ParserTest {
 
       assertEquals(msgAnaliseConcluida, msgRetornada);
    }
+
+   @Test
+   void deve_reconhecer_factor_inteiro() {
+      String codigo = "class Fruta { int metodo(string teste) { print +5; } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_reconhecer_factor_string_literal() {
+      String codigo = "class Fruta { int metodo(string teste) { print +\"a\"; } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_identificar_erro_fator_expression_sem_RPAREN() {
+      String codigo = "class Fruta { int metodo(string teste) { print +(-5 ; }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadFactorException.class, parser::program);
+   }
+
+   @Test
+   void deve_reconhecer_factor_expressao_entre_parenteses() {
+      String codigo = "class Fruta { int metodo(string teste) { print +(-5); } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
+
+   @Test
+   void deve_identificar_erro_unary_expression_sem_sinal() {
+      String codigo = "class Fruta { int metodo(string teste) { print 5} }";
+      Parser parser = new Parser(codigo);
+
+      assertThrows(BadUnaryExpressionException.class, parser::program);
+   }
+
+   @Test
+   void deve_reconhecer_statement_super_com_lista_de_expressoes() {
+      String codigo = "class Fruta { int metodo(string teste) { super(+3, +3); } }";
+      Parser parser = new Parser(codigo);
+
+      String msgRetornada = parser.program();
+
+      assertEquals(msgAnaliseConcluida, msgRetornada);
+   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
